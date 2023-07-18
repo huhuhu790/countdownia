@@ -1,0 +1,85 @@
+.wrapper {
+    height: calc(100vh - 8px);
+    padding: 2px;
+    overflow: hidden;
+    margin: 2px;
+    display: flex;
+    box-sizing: content-box;
+    position: relative;
+}
+
+.topLeft {
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: inline-block;
+    height: 8px;
+    width: 8px;
+    border-top: 1px solid orange;
+    border-left: 1px solid orange;
+}
+
+.topRight {
+    position: absolute;
+    right: 0;
+    top: 0;
+    display: inline-block;
+    height: 8px;
+    width: 8px;
+    border-top: 1px solid orange;
+    border-right: 1px solid orange;
+}
+
+.bottomLeft {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    display: inline-block;
+    height: 8px;
+    width: 8px;
+    border-bottom: 1px solid orange;
+    border-left: 1px solid orange;
+}
+
+.bottomRight {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    display: inline-block;
+    height: 8px;
+    width: 8px;
+    border-bottom: 1px solid orange;
+    border-right: 1px solid orange;
+}
+
+.dragBar {
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: black;
+}
+
+.barItem {
+    height: 24px;
+    cursor: pointer;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 4px;
+}
+
+.content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.text {
+    user-select: none;
+    color: white;
+    flex: 1;
+    width: 100%;
+}
