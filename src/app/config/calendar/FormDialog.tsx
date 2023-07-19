@@ -66,7 +66,7 @@ export default forwardRef<FormDialogRef>(function FormDialog(_, ref) {
                     To {formTypeAdd ? "add" : "edit"} an event, please enter your Title and date.
                 </DialogContentText>
                 <TextField
-                    label="line"
+                    label="title"
                     type="text"
                     fullWidth
                     value={title}
@@ -82,7 +82,7 @@ export default forwardRef<FormDialogRef>(function FormDialog(_, ref) {
                 <DesktopDatePicker value={startDate} onChange={setStartDate} />
                 <DesktopDatePicker value={endDate} onChange={setEndDate} />
                 <TextField
-                    label="line"
+                    label="description"
                     type="text"
                     fullWidth
                     value={description}

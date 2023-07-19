@@ -124,7 +124,8 @@ export default forwardRef<CalendarAreaRef, {
             //     window.ipcRenderer.send('show-context-menu')
             // }}
             sx={{
-                padding: 2,
+                px: 2,
+                py: 4,
                 minHeight: "100%",
                 display: "flex",
                 flexDirection: "column",

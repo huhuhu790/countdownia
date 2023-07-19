@@ -1,6 +1,6 @@
 import {
     AppBar, Box,
-    Toolbar, Paper
+    Toolbar, Paper, List, ListItem, Divider, ListItemText, Typography
 } from "@mui/material"
 import CalendarArea, { CalendarAreaRef } from "./CalendarArea";
 import { useEffect, useRef, useState } from "react";
@@ -73,7 +73,8 @@ export default function CalendarPage() {
     );
 }
 
-function SideBar({ countdownDate,
+function SideBar({
+    countdownDate,
     dayGridMonth
 }: {
     countdownDate: DateList
@@ -83,13 +84,31 @@ function SideBar({ countdownDate,
         <>
             <Toolbar></Toolbar>
             <Box sx={{ cursor: "pointer" }}>
-                {
-                    countdownDate.map(i => (
-                        <Box onClick={() => dayGridMonth(new Date(i.date))} key={i.id}>
-                            {i.date}
-                        </Box>
-                    ))
-                }
+                <List sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}>
+                    {
+                        countdownDate.map(i => (
+                            <>
+                                <ListItem alignItems="flex-start" onClick={() => dayGridMonth(new Date(i.date))} key={i.id}>
+                                    <ListItemText
+                                        primary={i.title}
+                                        secondary={
+                                            <>
+                                                <Typography
+                                                    variant="body2"
+                                                    color="text.primary"
+                                                >
+                                                    {i.endDate ? `${i.date}-${i.endDate}` : i.date}
+                                                </Typography>
+                                                {i.description}
+                                            </>
+                                        }
+                                    />
+                                </ListItem>
+                                <Divider />
+                            </>
+                        ))
+                    }
+                </List>
             </Box>
         </>
     )

@@ -7,9 +7,10 @@
         border: none !important;
     }
 
+    .fc-timegrid-slot,
     th,
     td {
-        border: 1px solid rgb(229, 231, 235);
+        border: 1px solid var(--fc-neutral-bg-color);
         border-collapse: collapse;
     }
 
@@ -147,9 +148,10 @@
     .fc {
         --fc-neutral-bg-color: rgb(37, 40, 42);
 
+        .fc-timegrid-slot,
         th,
         td {
-            border: 1px solid rgb(37, 40, 42);
+            border: 1px solid var(--fc-neutral-bg-color);
         }
 
         .fc-event {

@@ -5,12 +5,16 @@ import LockOpenIcon from "@mui/icons-material/LockOpen"
 import DragHandleIcon from "@mui/icons-material/DragHandle"
 import NearMeIcon from "@mui/icons-material/NearMe"
 import NearMeOutlinedIcon from "@mui/icons-material/NearMeOutlined"
-import styles from "./Home.module.css"
 import type { IpcRendererEvent } from "electron"
+import { Autoplay } from 'swiper/modules';
+import { Swiper, SwiperClass, SwiperSlide } from 'swiper/react'
+import styles from "./Home.module.css"
+import 'swiper/css'
 
 const dragBar = window.ipcRenderer.getStore<number>("dragBar")
 const sideBar = window.ipcRenderer.getStore<number>("sideBar")
 const defaultLine = "距离$title还有$d天$h时$m分$s秒"
+const defaultLineReverse = "距离$title已过去$d天$h时$m分$s秒"
 interface TimeGroup {
     day: number
     hour: number
@@ -18,12 +22,10 @@ interface TimeGroup {
     seconds: number
 }
 
-interface TimeItem {
-    id: string
+interface TimeItem extends DateItem {
+    sign: boolean
     timeGroup: TimeGroup
-    title: string
     endTimeGroup?: TimeGroup
-    line?: string
 }
 
 function getTimeGroup(remain: number): TimeGroup {
@@ -48,7 +50,7 @@ function getTimeGroup(remain: number): TimeGroup {
 export default function Home() {
     //new Date(2023, 12 - 1, 27, 8).getTime()
     const [countdownDate, setCountdownDate] = useState(window.ipcRenderer.getStore<DateList>("countdownDate"))
-
+    const swiperRef = useRef<SwiperClass>()
     const box = useRef<HTMLDivElement>(null)
     const isUnlockRef = useRef(false)
     const [isUnlock, setIsUnlock] = useState(false)
@@ -66,17 +68,20 @@ export default function Home() {
 
     useEffect(() => {
         const now = Date.now()
-        const elapsed = countdownDate.map(i => ({
-            ...i,
-            date: Number(((i.date - now) / 1000).toFixed(0))
-        }))
+        const elapsed = countdownDate.map(i => {
+            let time = Number(((i.date - now) / 1000).toFixed(0))
+            let sign = time >= 0 ? true : false
+            return {
+                ...i,
+                date: Math.abs(time),
+                sign
+            }
+        })
 
         function handleSetTime() {
             setTime(elapsed.map(i => ({
-                id: i.id,
-                title: i.title,
-                timeGroup: getTimeGroup(i.date),
-                line: i.line
+                ...i,
+                timeGroup: getTimeGroup(i.date)
             })))
         }
         handleSetTime()
@@ -84,7 +89,7 @@ export default function Home() {
         let timeElapsed: number
         function onTimeout() {
             timeElapsed = window.setTimeout(() => {
-                elapsed.forEach(i => i.date--)
+                elapsed.forEach(i => i.sign ? --i.date : ++i.date)
                 handleSetTime()
                 onTimeout()
             }, 1000)
@@ -179,22 +184,38 @@ export default function Home() {
                     >
                         <DragHandleIcon />
                     </Box>
-                    <Box className={styles.text}>
-                        {
-                            time.map(i => {
-                                const s = (i.line ?? defaultLine)
-                                    .replace("$title", i.title)
-                                    .replace("$d", i.timeGroup.day.toString())
-                                    .replace("$h", i.timeGroup.hour.toString())
-                                    .replace("$m", i.timeGroup.minute.toString())
-                                    .replace("$s", i.timeGroup.seconds.toString())
-                                return (
-                                    <Box fontSize={fontSize} key={i.id}>
-                                        {s}
-                                    </Box>
-                                )
-                            })
-                        }
+                    <Box className={styles.text} fontSize={fontSize}>
+                        <Swiper
+                            className={styles.swper}
+                            direction="vertical"
+                            speed={1000}
+                            onSlideChange={() => console.log('slide change')}
+                            onSwiper={(swiper) => swiperRef.current = swiper}
+                            modules={[Autoplay]}
+                            autoplay={{
+                                delay: 3000,
+                                disableOnInteraction: false
+                            }}
+                        >
+                            {
+                                time.map(i => {
+                                    const s = (i.line ?? (i.sign ? defaultLine : defaultLineReverse))
+                                        .replace("$title", i.title)
+                                        .replace("$d", i.timeGroup.day.toString())
+                                        .replace("$h", i.timeGroup.hour.toString())
+                                        .replace("$m", i.timeGroup.minute.toString())
+                                        .replace("$s", i.timeGroup.seconds.toString())
+                                    return (
+                                        <SwiperSlide
+                                            className={styles.swperSlide}
+                                            key={i.id}
+                                        >
+                                            {s}
+                                        </SwiperSlide>
+                                    )
+                                })
+                            }
+                        </Swiper>
                     </Box>
                 </Box>
                 <Box

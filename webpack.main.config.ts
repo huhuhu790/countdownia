@@ -18,8 +18,8 @@ export const mainConfig: Configuration = {
     new CopyPlugin({
       patterns: [
         {
-          from: path.resolve(__dirname, "./assets"),
-          to: "assets"
+          from: path.resolve(__dirname, "./public"),
+          to: "public"
         },
       ],
     }),

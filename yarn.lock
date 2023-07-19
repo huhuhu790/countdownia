@@ -497,6 +497,11 @@
   resolved "https://registry.npmmirror.com/@eslint/js/-/js-8.44.0.tgz#961a5903c74139390478bdc808bcde3fc45ab7af"
   integrity sha512-Ag+9YM4ocKQx9AarydN0KY2j0ErMHNIocPDrVo8zAE44xLTjEtz81OdR68/cydGtk6m6jDb5Za3r2useMzYmSw==
 
+"@fontsource/roboto@^5.0.5":
+  version "5.0.5"
+  resolved "https://registry.npmmirror.com/@fontsource/roboto/-/roboto-5.0.5.tgz#56e4b2af0d684d6e33e311f307adb958fcf8eabd"
+  integrity sha512-IMXFq5AMgGx0sgNLfwWsmPuy3qa7lmDmQcXXihqwF4mT2UpD725cbxZj93ERY793OWon+6V1ANax02I3nt9+4w==
+
 "@fullcalendar/core@^6.1.8":
   version "6.1.8"
   resolved "https://registry.npmmirror.com/@fullcalendar/core/-/core-6.1.8.tgz#62008f7b2785dc01f0bf8c2f0c853925eab1c03a"
@@ -6135,6 +6140,11 @@ supports-preserve-symlinks-flag@^1.0.0:
   version "1.0.0"
   resolved "https://registry.npmmirror.com/supports-preserve-symlinks-flag/-/supports-preserve-symlinks-flag-1.0.0.tgz#6eda4bd344a3c94aea376d4cc31bc77311039e09"
   integrity sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==
+
+swiper@^10.0.4:
+  version "10.0.4"
+  resolved "https://registry.npmmirror.com/swiper/-/swiper-10.0.4.tgz#eb79eb518d740795d3b4247f404674f89c4e404e"
+  integrity sha512-DlNR3KiaVkPep6RraZ2tNr7lvyuzELuR+4NZr4wO42t0UworIO3DxDlz8b5Q3uUioh7cJad99EdRJLkPF+r8Ag==
 
 tapable@^2.0.0, tapable@^2.1.1, tapable@^2.2.0, tapable@^2.2.1:
   version "2.2.1"

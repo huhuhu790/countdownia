@@ -55,7 +55,10 @@ const contextMenu = Menu.buildFromTemplate([
     }
   },
   {
-    label: "模式",
+    type: "separator"
+  },
+  {
+    label: "模式切换",
     click() {
       if (nativeTheme.shouldUseDarkColors) {
         nativeTheme.themeSource = "light"
@@ -74,11 +77,20 @@ const contextMenu = Menu.buildFromTemplate([
     type: "separator"
   },
   {
-    label: "重置",
+    label: "重置位置",
     click() {
-      store.clear()
-      exitApp()
+      store.reset(
+        "size",
+        "position",
+        "fontSize"
+      )
+      const size = store.get("size")
+      homeWindow.setSize(size.width, size.height)
+      homeWindow.center()
     }
+  },
+  {
+    type: "separator"
   },
   {
     label: "退出",
@@ -87,7 +99,7 @@ const contextMenu = Menu.buildFromTemplate([
 ])
 function setContextMenu() {
   // 设置托盘图标
-  tray = new Tray(nativeImage.createFromPath(path.resolve(__dirname, "assets", "favicon.ico")))
+  tray = new Tray(nativeImage.createFromPath(path.resolve(__dirname, "public", "favicon.ico")))
   tray.setContextMenu(contextMenu)
   tray
     .addListener("click", () => {
@@ -264,7 +276,19 @@ if (handleSquirrelEvent(app)) {
           {
             id: "01",
             date: 1703635200000,
-            title: "瓜瓜"
+            title: "瓜瓜变猪",
+            description: "瓜瓜变猪"
+          },
+          {
+            id: "43e29468-b414-4f2b-aade-c16c35226f8d",
+            date: 1690473600000,
+            title: "瓜瓜猪",
+            description: "瓜瓜猪"
+          },
+          {
+            id: "e4c84150-f214-4e46-9de0-35be5f312e73",
+            date: 1689177600000,
+            title: "瓜瓜猪过"
           }
         ]
       },
