@@ -80,9 +80,7 @@
 .text {
     user-select: none;
     color: white;
-    flex: 1;
     width: 100%;
-    max-height: 100%;
 }
 
 .swper {
@@ -91,4 +89,15 @@
 
 .swperSlide {
     overflow: hidden;
+}
+
+.arrow {
+    position: sticky;
+    font-size: 12px;
+    width: 100%;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
 }

@@ -1,5 +1,5 @@
-import { Typography } from "@mui/material";
-import { useRouteError } from "react-router-dom";
+import { Typography } from "@mui/material"
+import { useRouteError } from "react-router-dom"
 
 interface ErrorItem {
     statusText?: string
@@ -7,9 +7,9 @@ interface ErrorItem {
 }
 
 export default function ErrorPage() {
-    const error: ErrorItem = useRouteError();
+    const error: ErrorItem = useRouteError()
 
     return (
         <Typography> {error.statusText || error.message} </Typography>
-    );
+    )
 }

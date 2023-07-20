@@ -1,7 +1,7 @@
 import { createMemoryRouter } from "react-router-dom"
-import ConfigLayout from '../layout'
-import CalendarPage from '../calendar'
-import ErrorPage from '../error'
+import ConfigLayout from "../layout"
+import CalendarPage from "../calendar"
+import ErrorPage from "../error"
 
 export default createMemoryRouter(
     [
@@ -17,4 +17,4 @@ export default createMemoryRouter(
             ],
         },
     ],
-);
+)

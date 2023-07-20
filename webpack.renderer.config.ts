@@ -1,23 +1,23 @@
-import type { Configuration } from 'webpack';
+import type { Configuration } from "webpack"
 
-import { rules } from './webpack.rules';
-import { plugins } from './webpack.plugins';
+import { rules } from "./webpack.rules"
+import { plugins } from "./webpack.plugins"
 
 rules.push({
   test: /\.(c|sa|sc)ss$/i,
   use: [
-    { loader: 'style-loader' },
+    { loader: "style-loader" },
     {
-      loader: 'css-loader',
+      loader: "css-loader",
       options: {
         modules: {
           auto: true
         }
       }
     },
-    { loader: 'sass-loader' }
+    { loader: "sass-loader" }
   ],
-});
+})
 
 export const rendererConfig: Configuration = {
   module: {
@@ -36,4 +36,4 @@ export const rendererConfig: Configuration = {
       ".sass",
     ],
   },
-};
+}

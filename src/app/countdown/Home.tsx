@@ -1,18 +1,24 @@
 import { Box, CssBaseline } from "@mui/material"
-import { useEffect, useRef, useState } from "react"
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react"
 import LockIcon from "@mui/icons-material/Lock"
 import LockOpenIcon from "@mui/icons-material/LockOpen"
 import DragHandleIcon from "@mui/icons-material/DragHandle"
 import NearMeIcon from "@mui/icons-material/NearMe"
 import NearMeOutlinedIcon from "@mui/icons-material/NearMeOutlined"
 import type { IpcRendererEvent } from "electron"
-import { Autoplay } from 'swiper/modules';
-import { Swiper, SwiperClass, SwiperSlide } from 'swiper/react'
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward"
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward"
+import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown"
+import KeyboardDoubleArrowUpIcon from "@mui/icons-material/KeyboardDoubleArrowUp"
+import PauseIcon from "@mui/icons-material/Pause"
+import PlayArrowIcon from "@mui/icons-material/PlayArrow"
+import { Autoplay } from "swiper/modules"
+import { Swiper, SwiperClass, SwiperSlide } from "swiper/react"
 import styles from "./Home.module.css"
-import 'swiper/css'
+import "swiper/css"
 
-const dragBar = window.ipcRenderer.getStore<number>("dragBar")
-const sideBar = window.ipcRenderer.getStore<number>("sideBar")
+const dragBar = 24
+const sideBar = 24
 const defaultLine = "距离$title还有$d天$h时$m分$s秒"
 const defaultLineReverse = "距离$title已过去$d天$h时$m分$s秒"
 interface TimeGroup {
@@ -48,14 +54,11 @@ function getTimeGroup(remain: number): TimeGroup {
 }
 
 export default function Home() {
-    //new Date(2023, 12 - 1, 27, 8).getTime()
     const [countdownDate, setCountdownDate] = useState(window.ipcRenderer.getStore<DateList>("countdownDate"))
-    const swiperRef = useRef<SwiperClass>()
     const box = useRef<HTMLDivElement>(null)
     const isUnlockRef = useRef(false)
+    const contentRef = useRef<ContentRef>()
     const [isUnlock, setIsUnlock] = useState(false)
-    const [isAlwaysTop, setIsAlwaysTop] = useState(window.ipcRenderer.getStore<boolean>("alwaysOnTop"))
-    const [fontSize, setFontSize] = useState(window.ipcRenderer.getStore<number>("fontSize"))
     const [isFocus, setIsFocus] = useState(false)
     const [time, setTime] = useState<TimeItem[]>([])
 
@@ -101,20 +104,15 @@ export default function Home() {
     }, [countdownDate])
 
     useEffect(() => {
-        function fontSizeHasChanged(e: IpcRendererEvent, data: number) {
-            setFontSize(data)
-        }
         function countdownDateHasChanged(e: IpcRendererEvent, data: DateList) {
             setCountdownDate(data)
         }
         window.ipcRenderer.addListener("hide", handleBlur)
         window.ipcRenderer.addListener("show", handleFocus)
-        window.ipcRenderer.addListener("fontSizeHasChanged", fontSizeHasChanged)
         window.ipcRenderer.addListener("countdownDateHasChanged", countdownDateHasChanged)
         return () => {
             window.ipcRenderer.removeListener("hide", handleBlur)
             window.ipcRenderer.removeListener("show", handleFocus)
-            window.ipcRenderer.removeListener("fontSizeHasChanged", fontSizeHasChanged)
             window.ipcRenderer.removeListener("countdownDateHasChanged", countdownDateHasChanged)
         }
     }, [])
@@ -140,15 +138,9 @@ export default function Home() {
         window.ipcRenderer.send("setResizable", current)
     }
 
-    function handleAlwaysTop() {
-        const newStatus = !isAlwaysTop
-        setIsAlwaysTop(newStatus)
-        window.ipcRenderer.send("setAlwaysOnTop", newStatus)
-    }
-
     function handleContextMenu(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
         e.preventDefault()
-        window.ipcRenderer.send("show-context-menu")
+        window.ipcRenderer.send("showCountdownContextMenu")
     }
 
     return (
@@ -184,60 +176,223 @@ export default function Home() {
                     >
                         <DragHandleIcon />
                     </Box>
-                    <Box className={styles.text} fontSize={fontSize}>
-                        <Swiper
-                            className={styles.swper}
-                            direction="vertical"
-                            speed={1000}
-                            onSlideChange={() => console.log('slide change')}
-                            onSwiper={(swiper) => swiperRef.current = swiper}
-                            modules={[Autoplay]}
-                            autoplay={{
-                                delay: 3000,
-                                disableOnInteraction: false
-                            }}
-                        >
-                            {
-                                time.map(i => {
-                                    const s = (i.line ?? (i.sign ? defaultLine : defaultLineReverse))
-                                        .replace("$title", i.title)
-                                        .replace("$d", i.timeGroup.day.toString())
-                                        .replace("$h", i.timeGroup.hour.toString())
-                                        .replace("$m", i.timeGroup.minute.toString())
-                                        .replace("$s", i.timeGroup.seconds.toString())
-                                    return (
-                                        <SwiperSlide
-                                            className={styles.swperSlide}
-                                            key={i.id}
-                                        >
-                                            {s}
-                                        </SwiperSlide>
-                                    )
-                                })
-                            }
-                        </Swiper>
-                    </Box>
+                    <Content time={time} isUnlock={isUnlock} ref={contentRef} />
                 </Box>
-                <Box
-                    sx={{ width: sideBar }}
-                    style={{
-                        display: isFocus ? "" : "none"
-                    }}
-                >
-                    <Box
-                        className={styles.barItem}
-                        onClick={() => handleLock()}
-                    >
-                        {isUnlock ? <LockOpenIcon fontSize="small" /> : <LockIcon fontSize="small" />}
-                    </Box>
-                    <Box
-                        className={styles.barItem}
-                        onClick={handleAlwaysTop}
-                    >
-                        {isAlwaysTop ? <NearMeIcon fontSize="small" /> : <NearMeOutlinedIcon fontSize="small" />}
-                    </Box>
-                </Box>
+                <OperationBar
+                    isFocus={isFocus}
+                    isUnlock={isUnlock}
+                    handleLock={handleLock}
+                    swiperRef={contentRef}
+                />
             </Box >
         </>
     )
 }
+const offset = 24
+function OperationBar({
+    isFocus,
+    isUnlock,
+    swiperRef,
+    handleLock
+}: {
+    isFocus: boolean
+    isUnlock: boolean
+    swiperRef: React.MutableRefObject<ContentRef>
+    handleLock: (status?: boolean) => void
+}) {
+    const wrapperRef = useRef<HTMLDivElement>()
+    const contentRef = useRef<HTMLDivElement>()
+    const showArrowRef = useRef(false)
+    const [isPlaying, setIsPlaying] = useState(true)
+    const [showArrowUp, setShowArrowUp] = useState(false)
+    const [showArrowDown, setShowArrowDown] = useState(false)
+    const [isAlwaysTop, setIsAlwaysTop] = useState(window.ipcRenderer.getStore<boolean>("alwaysOnTop"))
+    function onPrev() {
+        swiperRef.current.swiperRef.slidePrev()
+    }
+    function onNext() {
+        swiperRef.current.swiperRef.slideNext()
+    }
+    function onPaused() {
+        const autoplay = swiperRef.current.swiperRef.autoplay
+        if (isPlaying) autoplay.stop()
+        else autoplay.start()
+        setIsPlaying(!isPlaying)
+    }
+    function handleAlwaysTop() {
+        const newStatus = !isAlwaysTop
+        setIsAlwaysTop(newStatus)
+        window.ipcRenderer.send("setAlwaysOnTop", newStatus)
+    }
+    function scrollBit(top: number) {
+        wrapperRef.current.scrollBy({
+            top,
+            behavior: "smooth"
+        })
+    }
+    function onScroll() {
+        if (showArrowRef.current) {
+            if (wrapperRef.current.scrollTop === 0)
+                setShowArrowUp(false)
+            else setShowArrowUp(true)
+            if (wrapperRef.current.scrollTop + wrapperRef.current.offsetHeight === wrapperRef.current.scrollHeight)
+                setShowArrowDown(false)
+            else setShowArrowDown(true)
+        }
+    }
+    useEffect(() => {
+        if (isFocus) {
+            function resize() {
+                if (contentRef.current.offsetHeight > wrapperRef.current.offsetHeight) {
+                    showArrowRef.current = true
+                    setShowArrowDown(true)
+                } else {
+                    setShowArrowUp(false)
+                    setShowArrowDown(false)
+                    showArrowRef.current = false
+                }
+            }
+            resize()
+            window.addEventListener("resize", resize)
+            return () => {
+                window.removeEventListener("resize", resize)
+            }
+        }
+    }, [isFocus])
+    return (
+        <Box
+            sx={{
+                height: "100%",
+                overflow: "auto"
+            }}
+            style={{
+                display: isFocus ? "" : "none",
+                width: sideBar
+            }}
+            ref={wrapperRef}
+            onScroll={onScroll}
+        >
+            <Box ref={contentRef} sx={{ position: "relative" }}>
+                <Box
+                    className={styles.arrow}
+                    style={{
+                        display: showArrowUp ? "" : "none",
+                        top: 0,
+                        left: 0
+                    }}
+                    onClick={() => scrollBit(-offset)}
+                >
+                    <ArrowUpwardIcon fontSize="inherit" />
+                </Box>
+                <Box
+                    className={styles.barItem}
+                    onClick={() => handleLock()}
+                >
+                    {isUnlock ? <LockOpenIcon fontSize="small" /> : <LockIcon fontSize="small" />}
+                </Box>
+                <Box
+                    className={styles.barItem}
+                    onClick={handleAlwaysTop}
+                >
+                    {isAlwaysTop ? <NearMeIcon fontSize="small" /> : <NearMeOutlinedIcon fontSize="small" />}
+                </Box>
+                <Box
+                    className={styles.barItem}
+                    onClick={onPrev}
+                >
+                    <KeyboardDoubleArrowUpIcon fontSize="small" />
+                </Box>
+                <Box
+                    className={styles.barItem}
+                    onClick={onPaused}
+                >
+                    {isPlaying ? <PauseIcon fontSize="small" /> : <PlayArrowIcon fontSize="small" />}
+                </Box>
+                <Box
+                    className={styles.barItem}
+                    onClick={onNext}
+                >
+                    <KeyboardDoubleArrowDownIcon fontSize="small" />
+                </Box>
+                <Box
+                    className={styles.arrow}
+                    style={{
+                        display: showArrowDown ? "" : "none",
+                        bottom: 0,
+                        left: 0
+                    }}
+                    onClick={() => scrollBit(offset)}
+                >
+                    <ArrowDownwardIcon fontSize="inherit" />
+                </Box>
+            </Box>
+        </Box >
+    )
+}
+interface ContentProps {
+    isUnlock: boolean
+    time: TimeItem[]
+}
+interface ContentRef {
+    swiperRef: SwiperClass
+}
+const Content = forwardRef<ContentRef, ContentProps>(function Content({
+    isUnlock,
+    time
+}, ref) {
+    const swiperRef = useRef<SwiperClass>()
+    const [fontSize, setFontSize] = useState(window.ipcRenderer.getStore<number>("fontSize"))
+    const contentRef = useRef<HTMLDivElement>()
+    useImperativeHandle(ref, () => ({ swiperRef: swiperRef.current }), [])
+    useEffect(() => {
+        function fontSizeHasChanged(e: IpcRendererEvent, data: number) {
+            setFontSize(data)
+        }
+        swiperRef.current.autoplay.start()
+        window.ipcRenderer.addListener("fontSizeHasChanged", fontSizeHasChanged)
+        return () => {
+            window.ipcRenderer.removeListener("fontSizeHasChanged", fontSizeHasChanged)
+        }
+    }, [])
+    return (
+        <Box
+            className={styles.text}
+            style={{
+                height: isUnlock ? `calc( 100% - ${dragBar}px )` : "100%"
+            }}
+            fontSize={fontSize}
+            ref={contentRef}
+        >
+            <Swiper
+                className={styles.swper}
+                direction="vertical"
+                speed={1000}
+                onSwiper={(swiper) => swiperRef.current = swiper}
+                modules={[Autoplay]}
+                autoplay={{
+                    delay: 3000,
+                    disableOnInteraction: false
+                }}
+            >
+                {
+                    time.map(i => {
+                        const s = (i.line ?? (i.sign ? defaultLine : defaultLineReverse))
+                            .replace("$title", i.title)
+                            .replace("$d", i.timeGroup.day.toString())
+                            .replace("$h", i.timeGroup.hour.toString())
+                            .replace("$m", i.timeGroup.minute.toString())
+                            .replace("$s", i.timeGroup.seconds.toString())
+                        return (
+                            <SwiperSlide
+                                className={styles.swperSlide}
+                                key={i.id}
+                            >
+                                {s}
+                            </SwiperSlide>
+                        )
+                    })
+                }
+            </Swiper>
+        </Box>
+    )
+})

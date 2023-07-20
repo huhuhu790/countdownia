@@ -5,8 +5,8 @@ import {
 } from "@mui/material"
 import { forwardRef, useImperativeHandle, useRef, useState } from "react"
 import { EventInput } from "@fullcalendar/core"
-import { DesktopDatePicker } from '@mui/x-date-pickers';
-import dayjs, { Dayjs } from 'dayjs';
+import { DesktopDatePicker } from "@mui/x-date-pickers"
+import dayjs, { Dayjs } from "dayjs"
 
 export interface FormDialogRef {
     openDialog: (isFormTypeAdd: boolean, currentEvent?: EventInput) => void
@@ -63,7 +63,7 @@ export default forwardRef<FormDialogRef>(function FormDialog(_, ref) {
             <DialogTitle>{formTypeAdd ? "Add" : "Edit"}</DialogTitle>
             <DialogContent>
                 <DialogContentText>
-                    To {formTypeAdd ? "add" : "edit"} an event, please enter your Title and date.
+                    To {formTypeAdd ? "add" : "edit"} an event, please enter the following infomation.
                 </DialogContentText>
                 <TextField
                     label="title"
@@ -94,5 +94,5 @@ export default forwardRef<FormDialogRef>(function FormDialog(_, ref) {
                 <Button color="primary" onClick={onSubmit}>Submit</Button>
             </DialogActions>
         </Dialog>
-    );
+    )
 })

@@ -2,8 +2,8 @@ import {
     Avatar, Box, Divider,
     IconButton, List, ListItem,
     Toolbar, Tooltip, Paper
-} from '@mui/material';
-import BeachAccessIcon from '@mui/icons-material/BeachAccess'
+} from "@mui/material"
+import BeachAccessIcon from "@mui/icons-material/BeachAccess"
 import { Outlet, useNavigate } from "react-router-dom"
 import styles from "./layout.module.css"
 
@@ -26,14 +26,14 @@ function Drawer() {
             sx={{
                 width: drawerWidth + "px",
                 height: "100%",
-                overflow: 'auto'
+                overflow: "auto"
             }}
         >
             <Toolbar >
             </Toolbar>
             <Divider />
             <List>
-                {['calendar'].map((text) => (
+                {["calendar"].map((text) => (
                     <ListItem key={text} sx={{ justifyContent: "center" }}>
                         <Tooltip title={text} placement="right">
                             <Avatar>
@@ -66,5 +66,5 @@ export default function HomePage() {
                 </Box>
             </Box >
         </>
-    );
+    )
 }

@@ -19,6 +19,11 @@ declare const CONFIG_PRELOAD_WEBPACK_ENTRY: string
 const configWindowHeight = 700
 const configWindowWidth = 1200
 
+const homeWindowHeight = 100
+const homeWindowWidth = 80
+
+const dragBar = 24
+
 interface StoreType {
   size: {
     width: number
@@ -31,28 +36,36 @@ interface StoreType {
   }
   alwaysOnTop: boolean
   fontSize: number
-  dragBar: number
-  sideBar: number
 }
 
 let configWindow: BrowserWindow = null!
 let homeWindow: BrowserWindow = null!
 let tray: Tray = null!
 let store: Store<StoreType> = null!
+
+function exitApp() {
+  configWindow.hide()
+  homeWindow.hide()
+  configWindow.removeAllListeners()
+  homeWindow.removeAllListeners()
+  app.quit()
+}
+
+function reset() {
+  store.reset(
+    "size",
+    "position",
+    "fontSize"
+  )
+  const size = store.get("size")
+  homeWindow.setSize(size.width, size.height)
+  homeWindow.center()
+}
 // 设置菜单列表
 const contextMenu = Menu.buildFromTemplate([
   {
     label: "Countdownia",
     enabled: false,
-  },
-  {
-    type: "separator"
-  },
-  {
-    label: "配置",
-    click() {
-      configWindow.show()
-    }
   },
   {
     type: "separator"
@@ -74,19 +87,16 @@ const contextMenu = Menu.buildFromTemplate([
     }
   },
   {
+    label: "重置位置",
+    click: reset
+  },
+  {
     type: "separator"
   },
   {
-    label: "重置位置",
+    label: "配置",
     click() {
-      store.reset(
-        "size",
-        "position",
-        "fontSize"
-      )
-      const size = store.get("size")
-      homeWindow.setSize(size.width, size.height)
-      homeWindow.center()
+      configWindow.show()
     }
   },
   {
@@ -109,16 +119,26 @@ function setContextMenu() {
     .setToolTip("Countdownia")
 }
 
+const countdownContextMenu = Menu.buildFromTemplate([
+  {
+    label: "配置",
+    click() {
+      configWindow.show()
+    }
+  },
+  {
+    label: "退出",
+    click: exitApp
+  }
+])
 function setEvent() {
   ipcMain
-    // 
     .on("setWindowSize", (event, width, height) => {
       homeWindow.setSize(width, height)
     })
     .on("setResizable", (event, canResize) => {
       homeWindow.resizable = canResize
     })
-    // 
     .on("setAlwaysOnTop", (event, status) => {
       homeWindow.setAlwaysOnTop(status)
       store.set("alwaysOnTop", status)
@@ -126,7 +146,7 @@ function setEvent() {
     .on("setCountdownDate", (event, dateItem: DateItem) => {
       const countdownDate = store.get("countdownDate")
       if (dateItem.id) {
-        const index = countdownDate.findIndex(i => i.id = dateItem.id)
+        const index = countdownDate.findIndex(i => i.id === dateItem.id)
         if (index !== -1) countdownDate.splice(index, 1, dateItem)
       } else countdownDate.push({ ...dateItem, id: randomUUID() })
       store.set("countdownDate", countdownDate)
@@ -141,15 +161,12 @@ function setEvent() {
     .on("setFontSize", (event, fontSize) => {
       store.set("fontSize", fontSize)
     })
-    // 
     .on("getStore", (event, name) => {
       event.returnValue = store.get(name)
     })
-    // 
-    .on("show-context-menu", (event) => {
-      contextMenu.popup({ window: BrowserWindow.fromWebContents(event.sender)! })
+    .on("showCountdownContextMenu", (event) => {
+      countdownContextMenu.popup({ window: BrowserWindow.fromWebContents(event.sender)! })
     })
-    // 
     .on("dark-mode:system", () => {
       nativeTheme.themeSource = "system"
     })
@@ -171,8 +188,8 @@ function setHomeWindow() {
     icon: "public/favicon.ico",
     height: size.height,
     width: size.width,
-    minHeight: 50,
-    minWidth: 50,
+    minHeight: homeWindowHeight - dragBar,
+    minWidth: homeWindowWidth,
     x: position.x,
     y: position.y,
     webPreferences: {
@@ -204,7 +221,7 @@ function setHomeWindow() {
       const bounds = homeWindow.getBounds()
       store.set("size", {
         width: bounds.width,
-        height: bounds.height - store.get("dragBar")
+        height: bounds.height - dragBar
       })
     })
     .addListener("moved", () => {
@@ -237,23 +254,12 @@ function setConfigWindow() {
     show: false
   })
   configWindow
-    .once("ready-to-show", () => {
-      configWindow.show()
-    })
     .addListener("close", (event) => {
       event.preventDefault()
       configWindow.hide()
     })
 
   configWindow.loadURL(CONFIG_WEBPACK_ENTRY)
-}
-
-function exitApp() {
-  configWindow.hide()
-  homeWindow.hide()
-  configWindow.removeAllListeners()
-  homeWindow.removeAllListeners()
-  app.quit()
 }
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -267,7 +273,7 @@ if (handleSquirrelEvent(app)) {
         type: "object",
         default: {
           width: 800,
-          height: 100
+          height: 100 - dragBar
         }
       },
       countdownDate: {
@@ -303,26 +309,16 @@ if (handleSquirrelEvent(app)) {
       fontSize: {
         type: "number",
         default: 48
-      },
-      dragBar: {
-        type: "number",
-        default: 24
-      },
-      sideBar: {
-        type: "number",
-        default: 24
-      },
+      }
     }
   })
 
   store.onDidChange("fontSize", (newValue, oldValue) => {
-    console.log(newValue)
     homeWindow.webContents.send("fontSizeHasChanged", newValue)
     configWindow.webContents.send("fontSizeHasChanged", newValue)
   })
 
   store.onDidChange("countdownDate", (newValue, oldValue) => {
-    console.log(newValue)
     homeWindow.webContents.send("countdownDateHasChanged", newValue)
     configWindow.webContents.send("countdownDateHasChanged", newValue)
   })
@@ -334,17 +330,13 @@ if (handleSquirrelEvent(app)) {
   }
 
   app.on("ready", createWindow)
-  // Quit when all windows are closed, except on macOS. There, it"s common
-  // for applications and their menu bar to stay active until the user quits
-  // explicitly with Cmd + Q.
+
   app.on("window-all-closed", () => {
     if (process.platform !== "darwin") {
       app.quit()
     }
   })
   app.on("activate", () => {
-    // On OS X it"s common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow()
     }

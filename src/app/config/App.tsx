@@ -1,11 +1,11 @@
-import { CssBaseline, ThemeProvider, createTheme, useMediaQuery } from '@mui/material'
+import { CssBaseline, ThemeProvider, createTheme, useMediaQuery } from "@mui/material"
 import { SnackbarProvider } from "notistack"
 import { ConfirmProvider } from "material-ui-confirm"
-import { useMemo } from 'react'
+import { useMemo } from "react"
 import { RouterProvider, } from "react-router-dom"
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
-import router from './router'
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs"
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider"
+import router from "./router"
 
 export default function App() {
     const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)")
