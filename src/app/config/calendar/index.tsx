@@ -7,12 +7,14 @@ import { Fragment, useEffect, useRef, useState } from "react"
 import type { IpcRendererEvent } from "electron"
 import FormDialog, { FormDialogRef } from "./FormDialog"
 import dayjs from "dayjs"
+import ScrollTop from "../../components/ScrollTop"
 
 const sideWidth = 280
 const appBarHeight = 64
 
 export default function CalendarPage() {
     const calendarAreaRef = useRef<CalendarAreaRef>()
+    const parentRef = useRef<HTMLDivElement>()
     const [countdownDate, setCountdownDate] = useState(window.ipcRenderer.getStore<DateList>("countdownDate"))
     const formDialogRef = useRef<FormDialogRef>()
 
@@ -67,17 +69,20 @@ export default function CalendarPage() {
                     <Toolbar ></Toolbar>
                 </AppBar>
                 <Box
+                    ref={parentRef}
                     sx={{
                         width: "100%",
                         height: `calc(100% - ${appBarHeight}px)`,
                         overflow: "auto"
                     }}
                 >
+                    <div id="scroll-into"></div>
                     <CalendarArea
                         ref={calendarAreaRef}
                         formDialogRef={formDialogRef}
                         countdownDate={countdownDate} />
                 </Box>
+                <ScrollTop bottom={12} right={24} el={parentRef} position="absolute" />
             </Paper >
         </Box>
     )
@@ -109,7 +114,13 @@ function SideBar({
                             }
                             return (
                                 <Fragment key={i.id}>
-                                    <ListItem alignItems="flex-start" onClick={() => dayGridMonth(new Date(i.date))}>
+                                    <ListItem
+                                        alignItems="flex-start"
+                                        onClick={() => {
+                                            dayGridMonth(new Date(i.date))
+                                            location.hash = i.id
+                                        }}
+                                    >
                                         <ListItemText
                                             primary={i.title}
                                             primaryTypographyProps={{ noWrap: true }}

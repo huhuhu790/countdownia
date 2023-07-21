@@ -200,6 +200,7 @@ function setHomeWindow() {
     frame: false,
     skipTaskbar: true,
     maximizable: false,
+    minimizable: false,
     alwaysOnTop: alwaysOnTop
   })
 
@@ -207,6 +208,10 @@ function setHomeWindow() {
     .once("ready-to-show", () => {
       setContextMenu()
       homeWindow.show()
+    })
+    .addListener("close", (event) => {
+      event.preventDefault()
+      exitApp()
     })
     .addListener("minimize", () => {
       homeWindow.webContents.send("hide")

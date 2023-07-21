@@ -26,7 +26,7 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
 import "./CalendarArea.scss"
 import { FormDialogRef } from "./FormDialog"
 
-const options = ["Month View", "Day View"];
+const options = ["Month View", "Day View"]
 export interface CalendarAreaRef {
     dayGridMonth: (date?: Date) => void
 }
@@ -34,6 +34,7 @@ export interface CalendarAreaRef {
 function EventContent({ arg }: { arg: EventContentArg }) {
     return (
         <Box
+            id={arg.event._def.extendedProps.id}
             sx={{
                 display: "flex",
                 width: "100%",
@@ -85,8 +86,8 @@ function SplitButton({
     selectedIndex: number
     setSelectedIndex: React.Dispatch<React.SetStateAction<number>>
 }) {
-    const [open, setOpen] = useState(false);
-    const anchorRef = useRef<HTMLDivElement>(null);
+    const [open, setOpen] = useState(false)
+    const anchorRef = useRef<HTMLDivElement>(null)
 
     const handleMenuItemClick = (
         event: React.MouseEvent<HTMLLIElement, MouseEvent>,
@@ -95,23 +96,23 @@ function SplitButton({
         if (index === 0) dayGridMonth()
         else timeGridDay()
         setSelectedIndex(index)
-        setOpen(false);
-    };
+        setOpen(false)
+    }
 
     const handleToggle = () => {
-        setOpen((prevOpen) => !prevOpen);
-    };
+        setOpen((prevOpen) => !prevOpen)
+    }
 
     const handleClose = (event: Event) => {
         if (
             anchorRef.current &&
             anchorRef.current.contains(event.target as HTMLElement)
         ) {
-            return;
+            return
         }
 
-        setOpen(false);
-    };
+        setOpen(false)
+    }
 
     return (
         <>
@@ -139,7 +140,7 @@ function SplitButton({
                         {...TransitionProps}
                         style={{
                             transformOrigin:
-                                placement === 'bottom' ? 'center top' : 'center bottom',
+                                placement === "bottom" ? "center top" : "center bottom",
                         }}
                     >
                         <Paper>
@@ -162,7 +163,7 @@ function SplitButton({
                 )}
             </Popper>
         </>
-    );
+    )
 }
 
 interface Props {
@@ -196,25 +197,25 @@ const CalendarToolBar = forwardRef<Ref, Props>(function CalendarToolBar({
         switch (week) {
             case 1:
                 weekString = "一"
-                break;
+                break
             case 2:
                 weekString = "二"
-                break;
+                break
             case 3:
                 weekString = "三"
-                break;
+                break
             case 4:
                 weekString = "四"
-                break;
+                break
             case 5:
                 weekString = "五"
-                break;
+                break
             case 6:
                 weekString = "六"
-                break;
+                break
             case 7:
                 weekString = "日"
-                break;
+                break
         }
         return weekString
     }, [date])
@@ -387,6 +388,7 @@ export default forwardRef<CalendarAreaRef, {
                 pt: 4,
                 pb: 8,
                 minHeight: "100%",
+                display: "flex"
             }}
         >
             <Box
@@ -394,7 +396,9 @@ export default forwardRef<CalendarAreaRef, {
                     borderRadius: 2,
                     borderWidth: "1px",
                     borderStyle: "solid",
-                    overflow: "hidden"
+                    overflow: "hidden",
+                    display: "flex",
+                    flexDirection: "column"
                 }}
                 style={{
                     borderColor: palette.mode === "dark" ? "#121212" : "rgb(209 213 219)"

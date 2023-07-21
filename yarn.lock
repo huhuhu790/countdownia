@@ -4403,11 +4403,6 @@ matcher@^3.0.0:
   dependencies:
     escape-string-regexp "^4.0.0"
 
-material-ui-confirm@^3.0.9:
-  version "3.0.9"
-  resolved "https://registry.npmmirror.com/material-ui-confirm/-/material-ui-confirm-3.0.9.tgz#706198ec9f08ddd0fa9afa4cb27b2f1e1cf60412"
-  integrity sha512-WEAEG9z4MfwojoUyQiAjrjl8378tYbGKfiwOKz3zHaQKyXcHnFktUmV7b+F+G0yVo8kYrEMk9Bw+HxhA/2Enlw==
-
 media-typer@0.3.0:
   version "0.3.0"
   resolved "https://registry.npmmirror.com/media-typer/-/media-typer-0.3.0.tgz#8710d7af0aa626f8fffa1ce00168545263255748"
@@ -5326,6 +5321,11 @@ react-dom@^18.2.0:
   dependencies:
     loose-envify "^1.1.0"
     scheduler "^0.23.0"
+
+react-hook-form@^7.45.2:
+  version "7.45.2"
+  resolved "https://registry.npmmirror.com/react-hook-form/-/react-hook-form-7.45.2.tgz#c757f3d5e633ccb186443d57c10fc511df35721a"
+  integrity sha512-9s45OdTaKN+4NSTbXVqeDITd/nwIg++nxJGL8+OD5uf1DxvhsXQ641kaYHk5K28cpIOTYm71O/fYk7rFaygb3A==
 
 react-is@^16.13.1, react-is@^16.7.0:
   version "16.13.1"

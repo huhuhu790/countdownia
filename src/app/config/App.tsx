@@ -1,6 +1,5 @@
 import { CssBaseline, ThemeProvider, createTheme, useMediaQuery } from "@mui/material"
 import { SnackbarProvider } from "notistack"
-import { ConfirmProvider } from "material-ui-confirm"
 import { useMemo } from "react"
 import { RouterProvider, } from "react-router-dom"
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs"
@@ -28,11 +27,9 @@ export default function App() {
                 autoHideDuration={3000}
                 SnackbarProps={{}}
             >
-                <ConfirmProvider>
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                        <RouterProvider router={router} />
-                    </LocalizationProvider>
-                </ConfirmProvider>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <RouterProvider router={router} />
+                </LocalizationProvider>
             </SnackbarProvider>
         </ThemeProvider>
     )

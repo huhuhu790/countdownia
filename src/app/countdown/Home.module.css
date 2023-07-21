@@ -89,6 +89,7 @@
 
 .swperSlide {
     overflow: hidden;
+    line-break: anywhere;
 }
 
 .arrow {

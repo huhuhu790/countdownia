@@ -376,7 +376,8 @@ const Content = forwardRef<ContentRef, ContentProps>(function Content({
             >
                 {
                     time.map(i => {
-                        const s = (i.line ?? (i.sign ? defaultLine : defaultLineReverse))
+                        let line = (i.line && i.line !== "") ? i.line : (i.sign ? defaultLine : defaultLineReverse)
+                        const s = line
                             .replace("$title", i.title)
                             .replace("$d", i.timeGroup.day.toString())
                             .replace("$h", i.timeGroup.hour.toString())

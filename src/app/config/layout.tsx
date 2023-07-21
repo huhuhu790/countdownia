@@ -3,9 +3,11 @@ import {
     IconButton, List, ListItem,
     Toolbar, Tooltip, Paper
 } from "@mui/material"
+import EventNoteIcon from "@mui/icons-material/EventNote"
 import BeachAccessIcon from "@mui/icons-material/BeachAccess"
 import { Outlet, useNavigate } from "react-router-dom"
 import styles from "./layout.module.css"
+import { Fragment } from "react"
 
 const drawerWidth = 80
 
@@ -19,6 +21,18 @@ function DragBar({ children }: { children?: React.ReactNode }) {
     )
 }
 
+const list = [
+    {
+        name: "calendar",
+        route: "/",
+        icon: <EventNoteIcon />
+    },
+    {
+        name: "options",
+        route: "/options",
+        icon: <BeachAccessIcon />
+    }
+]
 function Drawer() {
     const nav = useNavigate()
     return (
@@ -33,19 +47,23 @@ function Drawer() {
             </Toolbar>
             <Divider />
             <List>
-                {["calendar"].map((text) => (
-                    <ListItem key={text} sx={{ justifyContent: "center" }}>
-                        <Tooltip title={text} placement="right">
-                            <Avatar>
-                                <IconButton color="inherit" onClick={() => nav(text)}>
-                                    <BeachAccessIcon />
-                                </IconButton>
-                            </Avatar>
-                        </Tooltip>
-                    </ListItem>
-                ))}
+                {
+                    list.map(i => (
+                        <Fragment key={i.name}>
+                            <ListItem sx={{ justifyContent: "center" }}>
+                                <Tooltip title={i.name} placement="right">
+                                    <Avatar>
+                                        <IconButton color="inherit" onClick={() => nav(i.route)}>
+                                            {i.icon}
+                                        </IconButton>
+                                    </Avatar>
+                                </Tooltip>
+                            </ListItem>
+                            <Divider />
+                        </Fragment>
+                    ))
+                }
             </List>
-            <Divider />
         </Paper>
     )
 }
