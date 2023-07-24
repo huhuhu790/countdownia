@@ -1,5 +1,5 @@
 import { Box, CssBaseline } from "@mui/material"
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react"
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react"
 import LockIcon from "@mui/icons-material/Lock"
 import LockOpenIcon from "@mui/icons-material/LockOpen"
 import DragHandleIcon from "@mui/icons-material/DragHandle"
@@ -14,6 +14,7 @@ import PauseIcon from "@mui/icons-material/Pause"
 import PlayArrowIcon from "@mui/icons-material/PlayArrow"
 import { Autoplay } from "swiper/modules"
 import { Swiper, SwiperClass, SwiperSlide } from "swiper/react"
+import type { RgbaColor } from "react-colorful"
 import styles from "./Home.module.css"
 import "swiper/css"
 
@@ -72,8 +73,8 @@ export default function Home() {
     useEffect(() => {
         const now = Date.now()
         const elapsed = countdownDate.map(i => {
-            let time = Number(((i.date - now) / 1000).toFixed(0))
-            let sign = time >= 0 ? true : false
+            const time = Number(((i.date - now) / 1000).toFixed(0))
+            const sign = time >= 0 ? true : false
             return {
                 ...i,
                 date: Math.abs(time),
@@ -336,31 +337,61 @@ interface ContentProps {
 interface ContentRef {
     swiperRef: SwiperClass
 }
+
 const Content = forwardRef<ContentRef, ContentProps>(function Content({
     isUnlock,
     time
 }, ref) {
     const swiperRef = useRef<SwiperClass>()
     const [fontSize, setFontSize] = useState(window.ipcRenderer.getStore<number>("fontSize"))
+    const [backgroundColor, setBackgroundColor] = useState(window.ipcRenderer.getStore<RgbaColor>("backgroundColor"))
+    const [useGradientColor, setUseGradientColor] = useState(window.ipcRenderer.getStore<boolean>("useGradientColor"))
+    const [gradientColorFrom, setGradientColorFrom] = useState(window.ipcRenderer.getStore<RgbaColor>("gradientColorFrom"))
+    const [gradientColorTo, setGradientColorTo] = useState(window.ipcRenderer.getStore<RgbaColor>("gradientColorTo"))
     const contentRef = useRef<HTMLDivElement>()
+    const backgroundColorString = useMemo(() => `rgba(${backgroundColor.r},${backgroundColor.g},${backgroundColor.b},${backgroundColor.a})`, [backgroundColor])
+    const gradientColorString = useMemo(() =>
+        `linear-gradient(to right, 
+        rgba(${gradientColorFrom.r},${gradientColorFrom.g},${gradientColorFrom.b},${gradientColorFrom.a}), 
+        rgba(${gradientColorTo.r},${gradientColorTo.g},${gradientColorTo.b},${gradientColorTo.a}))`,
+        [gradientColorFrom, gradientColorTo]
+    )
+
     useImperativeHandle(ref, () => ({ swiperRef: swiperRef.current }), [])
     useEffect(() => {
-        function fontSizeHasChanged(e: IpcRendererEvent, data: number) {
+        function fontSizeChanged(e: IpcRendererEvent, data: number) {
             setFontSize(data)
         }
+        function backgroundChanged(e: IpcRendererEvent, data: RgbaColor) {
+            setBackgroundColor(data)
+        }
+        function useGradientColorChanged(e: IpcRendererEvent, data: boolean) {
+            setUseGradientColor(data)
+        }
+        function gradientColorFromChanged(e: IpcRendererEvent, data: RgbaColor) {
+            setGradientColorFrom(data)
+        }
+        function gradientColorToChanged(e: IpcRendererEvent, data: RgbaColor) {
+            setGradientColorTo(data)
+        }
         swiperRef.current.autoplay.start()
-        window.ipcRenderer.addListener("fontSizeHasChanged", fontSizeHasChanged)
+        window.ipcRenderer.addListener("fontSizeHasChanged", fontSizeChanged)
+        window.ipcRenderer.addListener("backgroundColorHasChanged", backgroundChanged)
+        window.ipcRenderer.addListener("useGradientColorHasChanged", useGradientColorChanged)
+        window.ipcRenderer.addListener("gradientColorFromHasChanged", gradientColorFromChanged)
+        window.ipcRenderer.addListener("gradientColorToHasChanged", gradientColorToChanged)
         return () => {
-            window.ipcRenderer.removeListener("fontSizeHasChanged", fontSizeHasChanged)
+            window.ipcRenderer.removeListener("fontSizeHasChanged", fontSizeChanged)
+            window.ipcRenderer.removeListener("backgroundColorHasChanged", backgroundChanged)
+            window.ipcRenderer.removeListener("useGradientColorHasChanged", useGradientColorChanged)
+            window.ipcRenderer.removeListener("gradientColorFromHasChanged", gradientColorFromChanged)
+            window.ipcRenderer.removeListener("gradientColorToHasChanged", gradientColorToChanged)
         }
     }, [])
     return (
         <Box
             className={styles.text}
-            style={{
-                height: isUnlock ? `calc( 100% - ${dragBar}px )` : "100%"
-            }}
-            fontSize={fontSize}
+            style={{ height: isUnlock ? `calc( 100% - ${dragBar}px )` : "100%" }}
             ref={contentRef}
         >
             <Swiper
@@ -376,7 +407,7 @@ const Content = forwardRef<ContentRef, ContentProps>(function Content({
             >
                 {
                     time.map(i => {
-                        let line = (i.line && i.line !== "") ? i.line : (i.sign ? defaultLine : defaultLineReverse)
+                        const line = (i.line && i.line !== "") ? i.line : (i.sign ? defaultLine : defaultLineReverse)
                         const s = line
                             .replace("$title", i.title)
                             .replace("$d", i.timeGroup.day.toString())
@@ -388,7 +419,16 @@ const Content = forwardRef<ContentRef, ContentProps>(function Content({
                                 className={styles.swperSlide}
                                 key={i.id}
                             >
-                                {s}
+                                <Box
+                                    sx={{
+                                        fontSize: fontSize + "px",
+                                        background: useGradientColor ? gradientColorString : backgroundColorString,
+                                        backgroundClip: "text",
+                                        color: "transparent"
+                                    }}
+                                >
+                                    {s}
+                                </Box>
                             </SwiperSlide>
                         )
                     })

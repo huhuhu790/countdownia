@@ -11,6 +11,8 @@ import Store from "electron-store"
 import { handleSquirrelEvent } from "./utils/handleSquirrelEvent"
 import { randomUUID } from "crypto"
 import path from "node:path"
+import type { RgbaColor } from "react-colorful"
+
 declare const COUNTDOWN_WEBPACK_ENTRY: string
 declare const COUNTDOWN_PRELOAD_WEBPACK_ENTRY: string
 declare const CONFIG_WEBPACK_ENTRY: string
@@ -36,6 +38,10 @@ interface StoreType {
   }
   alwaysOnTop: boolean
   fontSize: number
+  backgroundColor: RgbaColor
+  useGradientColor: boolean
+  gradientColorFrom: RgbaColor
+  gradientColorTo: RgbaColor
 }
 
 let configWindow: BrowserWindow = null!
@@ -160,6 +166,18 @@ function setEvent() {
     })
     .on("setFontSize", (event, fontSize) => {
       store.set("fontSize", fontSize)
+    })
+    .on("setBackgroundColor", (event, backgroundColor) => {
+      store.set("backgroundColor", backgroundColor)
+    })
+    .on("setUseGradientColor", (event, useGradientColor) => {
+      store.set("useGradientColor", useGradientColor)
+    })
+    .on("setGradientColorFrom", (event, gradientColorFrom) => {
+      store.set("gradientColorFrom", gradientColorFrom)
+    })
+    .on("setGradientColorTo", (event, gradientColorTo) => {
+      store.set("gradientColorTo", gradientColorTo)
     })
     .on("getStore", (event, name) => {
       event.returnValue = store.get(name)
@@ -314,6 +332,37 @@ if (handleSquirrelEvent(app)) {
       fontSize: {
         type: "number",
         default: 48
+      },
+      backgroundColor: {
+        type: "object",
+        default: {
+          r: 255,
+          g: 255,
+          b: 255,
+          a: 1
+        }
+      },
+      useGradientColor: {
+        type: "boolean",
+        default: false
+      },
+      gradientColorFrom: {
+        type: "object",
+        default: {
+          r: 255,
+          g: 255,
+          b: 255,
+          a: 1
+        }
+      },
+      gradientColorTo: {
+        type: "object",
+        default: {
+          r: 255,
+          g: 255,
+          b: 255,
+          a: 1
+        }
       }
     }
   })
@@ -326,6 +375,26 @@ if (handleSquirrelEvent(app)) {
   store.onDidChange("countdownDate", (newValue, oldValue) => {
     homeWindow.webContents.send("countdownDateHasChanged", newValue)
     configWindow.webContents.send("countdownDateHasChanged", newValue)
+  })
+
+  store.onDidChange("backgroundColor", (newValue, oldValue) => {
+    homeWindow.webContents.send("backgroundColorHasChanged", newValue)
+    configWindow.webContents.send("backgroundColorHasChanged", newValue)
+  })
+
+  store.onDidChange("useGradientColor", (newValue, oldValue) => {
+    homeWindow.webContents.send("useGradientColorHasChanged", newValue)
+    configWindow.webContents.send("useGradientColorHasChanged", newValue)
+  })
+
+  store.onDidChange("gradientColorFrom", (newValue, oldValue) => {
+    homeWindow.webContents.send("gradientColorFromHasChanged", newValue)
+    configWindow.webContents.send("gradientColorFromHasChanged", newValue)
+  })
+
+  store.onDidChange("gradientColorTo", (newValue, oldValue) => {
+    homeWindow.webContents.send("gradientColorToHasChanged", newValue)
+    configWindow.webContents.send("gradientColorToHasChanged", newValue)
   })
 
   const createWindow = () => {

@@ -61,7 +61,7 @@ export default forwardRef<FormDialogRef>(function FormDialog(_, ref) {
     }
 
     const onSubmit = handleSubmit(
-        async (handler) => {
+        (handler) => {
             window.ipcRenderer.send("setCountdownDate", {
                 id: id.current,
                 date: handler.startDate.valueOf(),
