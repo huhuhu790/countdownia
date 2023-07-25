@@ -104,7 +104,6 @@ function setContextMenu() {
   tray
     .addListener("click", () => {
       homeWindow.show()
-      homeWindow.focus()
     })
     .setToolTip("Countdownia")
 }
@@ -165,6 +164,7 @@ function setEvent() {
     })
 }
 
+const WM_INITMENU = 0x0116;
 function setHomeWindow() {
   const size = store.get("size")
   const position = store.get("position")
@@ -178,8 +178,10 @@ function setHomeWindow() {
     x: position.x,
     y: position.y,
     webPreferences: {
-      preload: COUNTDOWN_PRELOAD_WEBPACK_ENTRY
+      preload: COUNTDOWN_PRELOAD_WEBPACK_ENTRY,
+      devTools: !app.isPackaged
     },
+    fullscreenable: false,
     show: false,
     transparent: true,
     frame: false,
@@ -221,6 +223,14 @@ function setHomeWindow() {
         y: bounds.y
       })
     })
+    .addListener("system-context-menu", (e) => {
+      e.preventDefault()
+    })
+    .hookWindowMessage(WM_INITMENU, () => {
+      homeWindow.setEnabled(false)
+      homeWindow.setEnabled(true)
+      contextMenu.popup({ window: homeWindow })
+    })
 
   homeWindow.loadURL(COUNTDOWN_WEBPACK_ENTRY)
 }
@@ -232,8 +242,10 @@ function setConfigWindow() {
     width: configWindowWidth,
     minHeight: configWindowHeight,
     minWidth: configWindowWidth,
+    fullscreenable: false,
     webPreferences: {
-      preload: CONFIG_PRELOAD_WEBPACK_ENTRY
+      preload: CONFIG_PRELOAD_WEBPACK_ENTRY,
+      devTools: !app.isPackaged
     },
     titleBarStyle: "hidden",
     titleBarOverlay: {
@@ -247,6 +259,14 @@ function setConfigWindow() {
     .addListener("close", (event) => {
       event.preventDefault()
       configWindow.hide()
+    })
+    .addListener("system-context-menu", (e) => {
+      e.preventDefault()
+    })
+    .hookWindowMessage(WM_INITMENU, () => {
+      configWindow.setEnabled(false)
+      configWindow.setEnabled(true)
+      contextMenu.popup({ window: configWindow })
     })
 
   configWindow.loadURL(CONFIG_WEBPACK_ENTRY)

@@ -13,7 +13,7 @@ const drawerWidth = 80
 
 function DragBar({ children }: { children?: React.ReactNode }) {
     return (
-        <div className={styles.titleBarContainer}>
+        <div className={styles.titleBarContainer} onContextMenu={e => e.preventDefault}>
             <div className={`${styles.titleBar} draggable`}>
                 {children}
             </div>

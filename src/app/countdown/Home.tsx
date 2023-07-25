@@ -174,6 +174,7 @@ export default function Home() {
                             height: dragBar + "px",
                             display: isUnlock ? "" : "none"
                         }}
+                        onContextMenu={e => e.preventDefault}
                     >
                         <DragHandleIcon />
                     </Box>
