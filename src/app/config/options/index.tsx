@@ -1,4 +1,9 @@
-import { ListItem, List, Paper, Typography, TextField, Box, Switch } from "@mui/material"
+import {
+    ListItem, List, Paper,
+    Typography, TextField, Box,
+    Switch, Divider, RadioGroup,
+    Radio, FormControl, FormControlLabel
+} from "@mui/material"
 import type { IpcRendererEvent } from "electron"
 import { useEffect, useMemo, useState } from "react"
 import { ColorPicker } from "../../components/ColorPicker"
@@ -7,6 +12,7 @@ import { RgbaColor } from "react-colorful"
 const maxFontSize = 300
 
 export default function OptionsPage() {
+    const [mode, setMode] = useState<string>(window.ipcRenderer.sendSync("getMode"))
     const [fontSize, setFontSize] = useState(window.ipcRenderer.getStore<number>("fontSize"))
     const [backgroundColor, setBackgroundColor] = useState(window.ipcRenderer.getStore<RgbaColor>("backgroundColor"))
     const [useGradientColor, setUseGradientColor] = useState(window.ipcRenderer.getStore<boolean>("useGradientColor"))
@@ -76,6 +82,12 @@ export default function OptionsPage() {
         window.ipcRenderer.send("setGradientColorTo", i)
     }
 
+    const handleRadioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const value = event.target.value
+        window.ipcRenderer.send("setMode", value)
+        setMode(value)
+    }
+
     return (
         <Paper
             elevation={2}
@@ -88,6 +100,21 @@ export default function OptionsPage() {
             }}
         >
             <List sx={{ width: "50%", margin: "auto", flex: 0 }}>
+                <ListItem sx={{ display: "flex", justifyContent: "space-between" }}>
+                    <Typography>Theme:</Typography>
+                    <FormControl>
+                        <RadioGroup
+                            row
+                            value={mode}
+                            onChange={handleRadioChange}
+                        >
+                            <FormControlLabel value="system" control={<Radio />} label="System" />
+                            <FormControlLabel value="dark" control={<Radio />} label="Dark" />
+                            <FormControlLabel value="light" control={<Radio />} label="Light" />
+                        </RadioGroup>
+                    </FormControl>
+                </ListItem>
+                <Divider />
                 <ListItem sx={{ display: "flex", justifyContent: "space-between" }}>
                     <Typography>FontSize(Max:{maxFontSize}):</Typography>
                     <TextField

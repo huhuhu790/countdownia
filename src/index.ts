@@ -70,31 +70,15 @@ function reset() {
 // 设置菜单列表
 const contextMenu = Menu.buildFromTemplate([
   {
-    label: "Countdownia",
-    enabled: false,
-  },
-  {
-    type: "separator"
-  },
-  {
-    label: "模式切换",
-    click() {
-      if (nativeTheme.shouldUseDarkColors) {
-        nativeTheme.themeSource = "light"
-      } else {
-        nativeTheme.themeSource = "dark"
-      }
-    }
-  },
-  {
-    label: "系统模式",
-    click() {
-      nativeTheme.themeSource = "system"
-    }
-  },
-  {
     label: "重置位置",
     click: reset
+  },
+  {
+    label: "重启",
+    click() {
+      app.relaunch()
+      exitApp()
+    }
   },
   {
     type: "separator"
@@ -125,18 +109,6 @@ function setContextMenu() {
     .setToolTip("Countdownia")
 }
 
-const countdownContextMenu = Menu.buildFromTemplate([
-  {
-    label: "配置",
-    click() {
-      configWindow.show()
-    }
-  },
-  {
-    label: "退出",
-    click: exitApp
-  }
-])
 function setEvent() {
   ipcMain
     .on("setWindowSize", (event, width, height) => {
@@ -183,18 +155,13 @@ function setEvent() {
       event.returnValue = store.get(name)
     })
     .on("showCountdownContextMenu", (event) => {
-      countdownContextMenu.popup({ window: BrowserWindow.fromWebContents(event.sender)! })
+      contextMenu.popup({ window: BrowserWindow.fromWebContents(event.sender)! })
     })
-    .on("dark-mode:system", () => {
-      nativeTheme.themeSource = "system"
+    .on("getMode", (event, name) => {
+      event.returnValue = nativeTheme.themeSource
     })
-    .handle("dark-mode:toggle", () => {
-      if (nativeTheme.shouldUseDarkColors) {
-        nativeTheme.themeSource = "light"
-      } else {
-        nativeTheme.themeSource = "dark"
-      }
-      return nativeTheme.shouldUseDarkColors
+    .on("setMode", (event, mode) => {
+      nativeTheme.themeSource = mode
     })
 }
 
