@@ -21,6 +21,5 @@ export default createMemoryRouter(
                 },
             ],
         },
-    ],
-    { initialEntries: ["/options"] }
+    ]
 )
