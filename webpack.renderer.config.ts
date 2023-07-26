@@ -15,7 +15,12 @@ rules.push({
         }
       }
     },
-    { loader: "sass-loader" }
+    {
+      loader: "postcss-loader"
+    },
+    {
+      loader: "sass-loader"
+    }
   ],
 })
 

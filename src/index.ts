@@ -36,26 +36,36 @@ interface StoreType {
 
 declare const COUNTDOWN_WEBPACK_ENTRY: string
 declare const COUNTDOWN_PRELOAD_WEBPACK_ENTRY: string
+
 declare const CONFIG_WEBPACK_ENTRY: string
 declare const CONFIG_PRELOAD_WEBPACK_ENTRY: string
+
+declare const STARTUP_WEBPACK_ENTRY: string
+
+const WM_INITMENU = 0x0116;
+const configWindowHeight = 700
+const configWindowWidth = 1200
+
+const homeWindowHeight = 100
+const homeWindowWidth = 80
+
+const dragBar = 24
+
+let configWindow: BrowserWindow = null!,
+  homeWindow: BrowserWindow = null!,
+  startupWindow: BrowserWindow = null!,
+  tray: Tray = null!,
+  store:Store<StoreType> = null!,
+  contextMenu: Menu= null!
+
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 // this should be placed at top of main.js to handle setup events quickly
 if (handleSquirrelEvent(app)) {
   // squirrel event handled and app will exit in 1000ms, so don"t do anything else
 } else {
-  const configWindowHeight = 700
-  const configWindowWidth = 1200
-
-  const homeWindowHeight = 100
-  const homeWindowWidth = 80
-
-  const dragBar = 24
-
-  let configWindow: BrowserWindow = null!
-  let homeWindow: BrowserWindow = null!
-  let tray: Tray = null!
-  const store = new Store<StoreType>({
+  /*************** store ***************/
+  store = new Store<StoreType>({
     schema: {
       size: {
         type: "object",
@@ -136,6 +146,41 @@ if (handleSquirrelEvent(app)) {
     }
   })
 
+  store.onDidChange("fontSize", (newValue, oldValue) => {
+    homeWindow.webContents.send("fontSizeHasChanged", newValue)
+    configWindow.webContents.send("fontSizeHasChanged", newValue)
+  })
+
+  store.onDidChange("countdownDate", (newValue, oldValue) => {
+    homeWindow.webContents.send("countdownDateHasChanged", newValue)
+    configWindow.webContents.send("countdownDateHasChanged", newValue)
+  })
+
+  store.onDidChange("backgroundColor", (newValue, oldValue) => {
+    homeWindow.webContents.send("backgroundColorHasChanged", newValue)
+    configWindow.webContents.send("backgroundColorHasChanged", newValue)
+  })
+
+  store.onDidChange("useGradientColor", (newValue, oldValue) => {
+    homeWindow.webContents.send("useGradientColorHasChanged", newValue)
+    configWindow.webContents.send("useGradientColorHasChanged", newValue)
+  })
+
+  store.onDidChange("gradientColorFrom", (newValue, oldValue) => {
+    homeWindow.webContents.send("gradientColorFromHasChanged", newValue)
+    configWindow.webContents.send("gradientColorFromHasChanged", newValue)
+  })
+
+  store.onDidChange("gradientColorTo", (newValue, oldValue) => {
+    homeWindow.webContents.send("gradientColorToHasChanged", newValue)
+    configWindow.webContents.send("gradientColorToHasChanged", newValue)
+  })
+
+  store.onDidChange("openAtLogin", (newValue, oldValue) => {
+    configWindow.webContents.send("openAtLoginHasChanged", newValue)
+  })
+
+  /*************** menu & tray ***************/
   function exitApp() {
     configWindow.hide()
     homeWindow.hide()
@@ -154,8 +199,18 @@ if (handleSquirrelEvent(app)) {
     homeWindow.setSize(size.width, size.height)
     homeWindow.center()
   }
+
   // 设置菜单列表
-  const contextMenu = Menu.buildFromTemplate([
+  contextMenu = Menu.buildFromTemplate([
+    {
+      label: "showLoading",
+      click() {
+        if (startupWindow.isVisible)
+          startupWindow.show()
+        else
+          startupWindow.hide()
+      }
+    },
     {
       label: "重置位置",
       click: reset
@@ -184,6 +239,7 @@ if (handleSquirrelEvent(app)) {
       click: exitApp
     }
   ])
+
   function setContextMenu() {
     // 设置托盘图标
     tray = new Tray(nativeImage.createFromPath(path.resolve(__dirname, "public", "favicon.ico")))
@@ -195,6 +251,7 @@ if (handleSquirrelEvent(app)) {
       .setToolTip("Countdownia")
   }
 
+  /*************** event ***************/
   function setEvent() {
     ipcMain
       .on("setWindowSize", (event, width, height) => {
@@ -257,8 +314,9 @@ if (handleSquirrelEvent(app)) {
       })
   }
 
-  const WM_INITMENU = 0x0116;
+  /*************** window ***************/
   function setHomeWindow() {
+    setStartUpWindow()
     const size = store.get("size")
     const position = store.get("position")
     const alwaysOnTop = store.get("alwaysOnTop")
@@ -283,11 +341,12 @@ if (handleSquirrelEvent(app)) {
       minimizable: false,
       alwaysOnTop: alwaysOnTop
     })
-
     homeWindow
       .once("ready-to-show", () => {
+        startupWindow.hide()
         setContextMenu()
         homeWindow.show()
+        homeWindow.focus()
       })
       .addListener("close", (event) => {
         event.preventDefault()
@@ -365,40 +424,29 @@ if (handleSquirrelEvent(app)) {
     configWindow.loadURL(CONFIG_WEBPACK_ENTRY)
   }
 
-  store.onDidChange("fontSize", (newValue, oldValue) => {
-    homeWindow.webContents.send("fontSizeHasChanged", newValue)
-    configWindow.webContents.send("fontSizeHasChanged", newValue)
-  })
+  function setStartUpWindow() {
+    startupWindow = new BrowserWindow({
+      icon: "public/favicon.ico",
+      height: 400,
+      width: 400,
+      resizable: false,
+      webPreferences: {
+        devTools: !app.isPackaged
+      },
+      fullscreenable: false,
+      show: true,
+      transparent: true,
+      frame: false,
+      skipTaskbar: true,
+      maximizable: false,
+      minimizable: false,
+      alwaysOnTop: true
+    })
 
-  store.onDidChange("countdownDate", (newValue, oldValue) => {
-    homeWindow.webContents.send("countdownDateHasChanged", newValue)
-    configWindow.webContents.send("countdownDateHasChanged", newValue)
-  })
+    startupWindow.loadURL(STARTUP_WEBPACK_ENTRY)
+  }
 
-  store.onDidChange("backgroundColor", (newValue, oldValue) => {
-    homeWindow.webContents.send("backgroundColorHasChanged", newValue)
-    configWindow.webContents.send("backgroundColorHasChanged", newValue)
-  })
-
-  store.onDidChange("useGradientColor", (newValue, oldValue) => {
-    homeWindow.webContents.send("useGradientColorHasChanged", newValue)
-    configWindow.webContents.send("useGradientColorHasChanged", newValue)
-  })
-
-  store.onDidChange("gradientColorFrom", (newValue, oldValue) => {
-    homeWindow.webContents.send("gradientColorFromHasChanged", newValue)
-    configWindow.webContents.send("gradientColorFromHasChanged", newValue)
-  })
-
-  store.onDidChange("gradientColorTo", (newValue, oldValue) => {
-    homeWindow.webContents.send("gradientColorToHasChanged", newValue)
-    configWindow.webContents.send("gradientColorToHasChanged", newValue)
-  })
-
-  store.onDidChange("openAtLogin", (newValue, oldValue) => {
-    configWindow.webContents.send("openAtLoginHasChanged", newValue)
-  })
-
+  /*************** app ***************/
   const createWindow = () => {
     setHomeWindow()
     setConfigWindow()
@@ -421,7 +469,8 @@ if (handleSquirrelEvent(app)) {
       openAtLogin: store.get("openAtLogin"),
     })
 
-  // auto update, and I'm going to need a package server!
+  /*************** auto update ***************/
+  /*** I'm going to need a package server! ***/
   // const server = "https://your-deployment-url.com"
   // const url = `${server}/update/${process.platform}/${app.getVersion()}`
 
