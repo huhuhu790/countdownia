@@ -55,8 +55,8 @@ let configWindow: BrowserWindow = null!,
   homeWindow: BrowserWindow = null!,
   startupWindow: BrowserWindow = null!,
   tray: Tray = null!,
-  store:Store<StoreType> = null!,
-  contextMenu: Menu= null!
+  store: Store<StoreType> = null!,
+  contextMenu: Menu = null!
 
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -203,15 +203,6 @@ if (handleSquirrelEvent(app)) {
   // 设置菜单列表
   contextMenu = Menu.buildFromTemplate([
     {
-      label: "showLoading",
-      click() {
-        if (startupWindow.isVisible)
-          startupWindow.show()
-        else
-          startupWindow.hide()
-      }
-    },
-    {
       label: "重置位置",
       click: reset
     },
@@ -316,7 +307,6 @@ if (handleSquirrelEvent(app)) {
 
   /*************** window ***************/
   function setHomeWindow() {
-    setStartUpWindow()
     const size = store.get("size")
     const position = store.get("position")
     const alwaysOnTop = store.get("alwaysOnTop")
@@ -343,10 +333,12 @@ if (handleSquirrelEvent(app)) {
     })
     homeWindow
       .once("ready-to-show", () => {
-        startupWindow.hide()
         setContextMenu()
-        homeWindow.show()
-        homeWindow.focus()
+        setTimeout(() => {
+          startupWindow.hide()
+          homeWindow.show()
+          homeWindow.focus()
+        }, 3000)
       })
       .addListener("close", (event) => {
         event.preventDefault()
@@ -448,6 +440,7 @@ if (handleSquirrelEvent(app)) {
 
   /*************** app ***************/
   const createWindow = () => {
+    setStartUpWindow()
     setHomeWindow()
     setConfigWindow()
     setEvent()
