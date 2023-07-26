@@ -1,6 +1,8 @@
 import {
   app,
+  autoUpdater,
   BrowserWindow,
+  dialog,
   ipcMain,
   Menu,
   nativeImage,
@@ -13,19 +15,6 @@ import { randomUUID } from "crypto"
 import path from "node:path"
 import type { RgbaColor } from "react-colorful"
 
-declare const COUNTDOWN_WEBPACK_ENTRY: string
-declare const COUNTDOWN_PRELOAD_WEBPACK_ENTRY: string
-declare const CONFIG_WEBPACK_ENTRY: string
-declare const CONFIG_PRELOAD_WEBPACK_ENTRY: string
-
-const configWindowHeight = 700
-const configWindowWidth = 1200
-
-const homeWindowHeight = 100
-const homeWindowWidth = 80
-
-const dragBar = 24
-
 interface StoreType {
   size: {
     width: number
@@ -37,6 +26,7 @@ interface StoreType {
     y: number
   }
   alwaysOnTop: boolean
+  openAtLogin: boolean
   fontSize: number
   backgroundColor: RgbaColor
   useGradientColor: boolean
@@ -44,240 +34,28 @@ interface StoreType {
   gradientColorTo: RgbaColor
 }
 
-let configWindow: BrowserWindow = null!
-let homeWindow: BrowserWindow = null!
-let tray: Tray = null!
-let store: Store<StoreType> = null!
-
-function exitApp() {
-  configWindow.hide()
-  homeWindow.hide()
-  configWindow.removeAllListeners()
-  homeWindow.removeAllListeners()
-  app.quit()
-}
-
-function reset() {
-  store.reset(
-    "size",
-    "position",
-    "fontSize"
-  )
-  const size = store.get("size")
-  homeWindow.setSize(size.width, size.height)
-  homeWindow.center()
-}
-// 设置菜单列表
-const contextMenu = Menu.buildFromTemplate([
-  {
-    label: "重置位置",
-    click: reset
-  },
-  {
-    label: "重启",
-    click() {
-      app.relaunch()
-      exitApp()
-    }
-  },
-  {
-    type: "separator"
-  },
-  {
-    label: "配置",
-    click() {
-      configWindow.show()
-    }
-  },
-  {
-    type: "separator"
-  },
-  {
-    label: "退出",
-    click: exitApp
-  }
-])
-function setContextMenu() {
-  // 设置托盘图标
-  tray = new Tray(nativeImage.createFromPath(path.resolve(__dirname, "public", "favicon.ico")))
-  tray.setContextMenu(contextMenu)
-  tray
-    .addListener("click", () => {
-      homeWindow.show()
-    })
-    .setToolTip("Countdownia")
-}
-
-function setEvent() {
-  ipcMain
-    .on("setWindowSize", (event, width, height) => {
-      homeWindow.setSize(width, height)
-    })
-    .on("setResizable", (event, canResize) => {
-      homeWindow.resizable = canResize
-    })
-    .on("setAlwaysOnTop", (event, status) => {
-      homeWindow.setAlwaysOnTop(status)
-      store.set("alwaysOnTop", status)
-    })
-    .on("setCountdownDate", (event, dateItem: DateItem) => {
-      const countdownDate = store.get("countdownDate")
-      if (dateItem.id) {
-        const index = countdownDate.findIndex(i => i.id === dateItem.id)
-        if (index !== -1) countdownDate.splice(index, 1, dateItem)
-      } else countdownDate.push({ ...dateItem, id: randomUUID() })
-      store.set("countdownDate", countdownDate)
-    })
-    .on("deleteCountdownDate", (event, id: string) => {
-      const countdownDate = store.get("countdownDate")
-      const index = countdownDate.findIndex(i => i.id = id)
-      if (index === -1) return
-      else countdownDate.splice(index, 1)
-      store.set("countdownDate", countdownDate)
-    })
-    .on("setFontSize", (event, fontSize) => {
-      store.set("fontSize", fontSize)
-    })
-    .on("setBackgroundColor", (event, backgroundColor) => {
-      store.set("backgroundColor", backgroundColor)
-    })
-    .on("setUseGradientColor", (event, useGradientColor) => {
-      store.set("useGradientColor", useGradientColor)
-    })
-    .on("setGradientColorFrom", (event, gradientColorFrom) => {
-      store.set("gradientColorFrom", gradientColorFrom)
-    })
-    .on("setGradientColorTo", (event, gradientColorTo) => {
-      store.set("gradientColorTo", gradientColorTo)
-    })
-    .on("getStore", (event, name) => {
-      event.returnValue = store.get(name)
-    })
-    .on("showCountdownContextMenu", (event) => {
-      contextMenu.popup({ window: BrowserWindow.fromWebContents(event.sender)! })
-    })
-    .on("getMode", (event, name) => {
-      event.returnValue = nativeTheme.themeSource
-    })
-    .on("setMode", (event, mode) => {
-      nativeTheme.themeSource = mode
-    })
-}
-
-const WM_INITMENU = 0x0116;
-function setHomeWindow() {
-  const size = store.get("size")
-  const position = store.get("position")
-  const alwaysOnTop = store.get("alwaysOnTop")
-  homeWindow = new BrowserWindow({
-    icon: "public/favicon.ico",
-    height: size.height,
-    width: size.width,
-    minHeight: homeWindowHeight - dragBar,
-    minWidth: homeWindowWidth,
-    x: position.x,
-    y: position.y,
-    webPreferences: {
-      preload: COUNTDOWN_PRELOAD_WEBPACK_ENTRY,
-      devTools: !app.isPackaged
-    },
-    fullscreenable: false,
-    show: false,
-    transparent: true,
-    frame: false,
-    skipTaskbar: true,
-    maximizable: false,
-    minimizable: false,
-    alwaysOnTop: alwaysOnTop
-  })
-
-  homeWindow
-    .once("ready-to-show", () => {
-      setContextMenu()
-      homeWindow.show()
-    })
-    .addListener("close", (event) => {
-      event.preventDefault()
-      exitApp()
-    })
-    .addListener("minimize", () => {
-      homeWindow.webContents.send("hide")
-    })
-    .addListener("focus", () => {
-      homeWindow.webContents.send("show")
-    })
-    .addListener("blur", () => {
-      homeWindow.webContents.send("hide")
-    })
-    .addListener("resized", () => {
-      const bounds = homeWindow.getBounds()
-      store.set("size", {
-        width: bounds.width,
-        height: bounds.height - dragBar
-      })
-    })
-    .addListener("moved", () => {
-      const bounds = homeWindow.getBounds()
-      store.set("position", {
-        x: bounds.x,
-        y: bounds.y
-      })
-    })
-    .addListener("system-context-menu", (e) => {
-      e.preventDefault()
-    })
-    .hookWindowMessage(WM_INITMENU, () => {
-      homeWindow.setEnabled(false)
-      homeWindow.setEnabled(true)
-      contextMenu.popup({ window: homeWindow })
-    })
-
-  homeWindow.loadURL(COUNTDOWN_WEBPACK_ENTRY)
-}
-
-function setConfigWindow() {
-  configWindow = new BrowserWindow({
-    icon: "public/favicon.ico",
-    height: configWindowHeight,
-    width: configWindowWidth,
-    minHeight: configWindowHeight,
-    minWidth: configWindowWidth,
-    fullscreenable: false,
-    webPreferences: {
-      preload: CONFIG_PRELOAD_WEBPACK_ENTRY,
-      devTools: !app.isPackaged
-    },
-    titleBarStyle: "hidden",
-    titleBarOverlay: {
-      color: "rgba(0,0,0,0)",
-      symbolColor: "white",
-      height: 32
-    },
-    show: false
-  })
-  configWindow
-    .addListener("close", (event) => {
-      event.preventDefault()
-      configWindow.hide()
-    })
-    .addListener("system-context-menu", (e) => {
-      e.preventDefault()
-    })
-    .hookWindowMessage(WM_INITMENU, () => {
-      configWindow.setEnabled(false)
-      configWindow.setEnabled(true)
-      contextMenu.popup({ window: configWindow })
-    })
-
-  configWindow.loadURL(CONFIG_WEBPACK_ENTRY)
-}
+declare const COUNTDOWN_WEBPACK_ENTRY: string
+declare const COUNTDOWN_PRELOAD_WEBPACK_ENTRY: string
+declare const CONFIG_WEBPACK_ENTRY: string
+declare const CONFIG_PRELOAD_WEBPACK_ENTRY: string
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 // this should be placed at top of main.js to handle setup events quickly
 if (handleSquirrelEvent(app)) {
   // squirrel event handled and app will exit in 1000ms, so don"t do anything else
 } else {
-  store = new Store<StoreType>({
+  const configWindowHeight = 700
+  const configWindowWidth = 1200
+
+  const homeWindowHeight = 100
+  const homeWindowWidth = 80
+
+  const dragBar = 24
+
+  let configWindow: BrowserWindow = null!
+  let homeWindow: BrowserWindow = null!
+  let tray: Tray = null!
+  const store = new Store<StoreType>({
     schema: {
       size: {
         type: "object",
@@ -333,6 +111,10 @@ if (handleSquirrelEvent(app)) {
         type: "boolean",
         default: false
       },
+      openAtLogin: {
+        type: "boolean",
+        default: false
+      },
       gradientColorFrom: {
         type: "object",
         default: {
@@ -353,6 +135,235 @@ if (handleSquirrelEvent(app)) {
       }
     }
   })
+
+  function exitApp() {
+    configWindow.hide()
+    homeWindow.hide()
+    configWindow.removeAllListeners()
+    homeWindow.removeAllListeners()
+    app.quit()
+  }
+
+  function reset() {
+    store.reset(
+      "size",
+      "position",
+      "fontSize"
+    )
+    const size = store.get("size")
+    homeWindow.setSize(size.width, size.height)
+    homeWindow.center()
+  }
+  // 设置菜单列表
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: "重置位置",
+      click: reset
+    },
+    {
+      label: "重启",
+      click() {
+        app.relaunch()
+        exitApp()
+      }
+    },
+    {
+      type: "separator"
+    },
+    {
+      label: "配置",
+      click() {
+        configWindow.show()
+      }
+    },
+    {
+      type: "separator"
+    },
+    {
+      label: "退出",
+      click: exitApp
+    }
+  ])
+  function setContextMenu() {
+    // 设置托盘图标
+    tray = new Tray(nativeImage.createFromPath(path.resolve(__dirname, "public", "favicon.ico")))
+    tray.setContextMenu(contextMenu)
+    tray
+      .addListener("click", () => {
+        homeWindow.show()
+      })
+      .setToolTip("Countdownia")
+  }
+
+  function setEvent() {
+    ipcMain
+      .on("setWindowSize", (event, width, height) => {
+        homeWindow.setSize(width, height)
+      })
+      .on("setResizable", (event, canResize) => {
+        homeWindow.resizable = canResize
+      })
+      .on("setAlwaysOnTop", (event, status) => {
+        homeWindow.setAlwaysOnTop(status)
+        store.set("alwaysOnTop", status)
+      })
+      .on("setCountdownDate", (event, dateItem: DateItem) => {
+        const countdownDate = store.get("countdownDate")
+        if (dateItem.id) {
+          const index = countdownDate.findIndex(i => i.id === dateItem.id)
+          if (index !== -1) countdownDate.splice(index, 1, dateItem)
+        } else countdownDate.push({ ...dateItem, id: randomUUID() })
+        store.set("countdownDate", countdownDate)
+      })
+      .on("deleteCountdownDate", (event, id: string) => {
+        const countdownDate = store.get("countdownDate")
+        const index = countdownDate.findIndex(i => i.id = id)
+        if (index === -1) return
+        else countdownDate.splice(index, 1)
+        store.set("countdownDate", countdownDate)
+      })
+      .on("setFontSize", (event, fontSize) => {
+        store.set("fontSize", fontSize)
+      })
+      .on("setBackgroundColor", (event, backgroundColor) => {
+        store.set("backgroundColor", backgroundColor)
+      })
+      .on("setUseGradientColor", (event, useGradientColor) => {
+        store.set("useGradientColor", useGradientColor)
+      })
+      .on("setGradientColorFrom", (event, gradientColorFrom) => {
+        store.set("gradientColorFrom", gradientColorFrom)
+      })
+      .on("setGradientColorTo", (event, gradientColorTo) => {
+        store.set("gradientColorTo", gradientColorTo)
+      })
+      .on("setOpenAtLogin", (event, openAtLogin) => {
+        store.set("openAtLogin", openAtLogin)
+        app.setLoginItemSettings({
+          openAtLogin
+        })
+      })
+      .on("getStore", (event, name) => {
+        event.returnValue = store.get(name)
+      })
+      .on("showCountdownContextMenu", (event) => {
+        contextMenu.popup({ window: BrowserWindow.fromWebContents(event.sender)! })
+      })
+      .on("getMode", (event, name) => {
+        event.returnValue = nativeTheme.themeSource
+      })
+      .on("setMode", (event, mode) => {
+        nativeTheme.themeSource = mode
+      })
+  }
+
+  const WM_INITMENU = 0x0116;
+  function setHomeWindow() {
+    const size = store.get("size")
+    const position = store.get("position")
+    const alwaysOnTop = store.get("alwaysOnTop")
+    homeWindow = new BrowserWindow({
+      icon: "public/favicon.ico",
+      height: size.height,
+      width: size.width,
+      minHeight: homeWindowHeight - dragBar,
+      minWidth: homeWindowWidth,
+      x: position.x,
+      y: position.y,
+      webPreferences: {
+        preload: COUNTDOWN_PRELOAD_WEBPACK_ENTRY,
+        devTools: !app.isPackaged
+      },
+      fullscreenable: false,
+      show: false,
+      transparent: true,
+      frame: false,
+      skipTaskbar: true,
+      maximizable: false,
+      minimizable: false,
+      alwaysOnTop: alwaysOnTop
+    })
+
+    homeWindow
+      .once("ready-to-show", () => {
+        setContextMenu()
+        homeWindow.show()
+      })
+      .addListener("close", (event) => {
+        event.preventDefault()
+        exitApp()
+      })
+      .addListener("minimize", () => {
+        homeWindow.webContents.send("hide")
+      })
+      .addListener("focus", () => {
+        homeWindow.webContents.send("show")
+      })
+      .addListener("blur", () => {
+        homeWindow.webContents.send("hide")
+      })
+      .addListener("resized", () => {
+        const bounds = homeWindow.getBounds()
+        store.set("size", {
+          width: bounds.width,
+          height: bounds.height - dragBar
+        })
+      })
+      .addListener("moved", () => {
+        const bounds = homeWindow.getBounds()
+        store.set("position", {
+          x: bounds.x,
+          y: bounds.y
+        })
+      })
+      .addListener("system-context-menu", (e) => {
+        e.preventDefault()
+      })
+      .hookWindowMessage(WM_INITMENU, () => {
+        homeWindow.setEnabled(false)
+        homeWindow.setEnabled(true)
+        contextMenu.popup({ window: homeWindow })
+      })
+
+    homeWindow.loadURL(COUNTDOWN_WEBPACK_ENTRY)
+  }
+
+  function setConfigWindow() {
+    configWindow = new BrowserWindow({
+      icon: "public/favicon.ico",
+      height: configWindowHeight,
+      width: configWindowWidth,
+      minHeight: configWindowHeight,
+      minWidth: configWindowWidth,
+      fullscreenable: false,
+      webPreferences: {
+        preload: CONFIG_PRELOAD_WEBPACK_ENTRY,
+        devTools: !app.isPackaged
+      },
+      titleBarStyle: "hidden",
+      titleBarOverlay: {
+        color: "rgba(0,0,0,0)",
+        symbolColor: "white",
+        height: 32
+      },
+      show: false
+    })
+    configWindow
+      .addListener("close", (event) => {
+        event.preventDefault()
+        configWindow.hide()
+      })
+      .addListener("system-context-menu", (e) => {
+        e.preventDefault()
+      })
+      .hookWindowMessage(WM_INITMENU, () => {
+        configWindow.setEnabled(false)
+        configWindow.setEnabled(true)
+        contextMenu.popup({ window: configWindow })
+      })
+
+    configWindow.loadURL(CONFIG_WEBPACK_ENTRY)
+  }
 
   store.onDidChange("fontSize", (newValue, oldValue) => {
     homeWindow.webContents.send("fontSizeHasChanged", newValue)
@@ -384,22 +395,55 @@ if (handleSquirrelEvent(app)) {
     configWindow.webContents.send("gradientColorToHasChanged", newValue)
   })
 
+  store.onDidChange("openAtLogin", (newValue, oldValue) => {
+    configWindow.webContents.send("openAtLoginHasChanged", newValue)
+  })
+
   const createWindow = () => {
     setHomeWindow()
     setConfigWindow()
     setEvent()
   }
 
-  app.on("ready", createWindow)
+  app
+    .on("ready", createWindow)
+    .on("window-all-closed", () => {
+      if (process.platform !== "darwin") {
+        app.quit()
+      }
+    })
+    .on("activate", () => {
+      if (BrowserWindow.getAllWindows().length === 0) {
+        createWindow()
+      }
+    })
+    .setLoginItemSettings({
+      openAtLogin: store.get("openAtLogin"),
+    })
 
-  app.on("window-all-closed", () => {
-    if (process.platform !== "darwin") {
-      app.quit()
-    }
-  })
-  app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow()
-    }
-  })
+  // auto update, and I'm going to need a package server!
+  // const server = "https://your-deployment-url.com"
+  // const url = `${server}/update/${process.platform}/${app.getVersion()}`
+
+  // autoUpdater.setFeedURL({ url })
+  // setInterval(() => {
+  //   autoUpdater.checkForUpdates()
+  // }, 60000)
+  // autoUpdater.on("update-downloaded", (event, releaseNotes, releaseName) => {
+  //   dialog.showMessageBox({
+  //     type: "info",
+  //     buttons: ["Restart", "Later"],
+  //     title: "Application Update",
+  //     message: process.platform === "win32" ? releaseNotes : releaseName,
+  //     detail:
+  //       "A new version has been downloaded. Restart the application to apply the updates."
+  //   })
+  //     .then((returnValue) => {
+  //       if (returnValue.response === 0) autoUpdater.quitAndInstall()
+  //     })
+  // })
+  // autoUpdater.on("error", (message) => {
+  //   console.error("There was a problem updating the application")
+  //   console.error(message)
+  // })
 }

@@ -18,6 +18,7 @@ export default function OptionsPage() {
     const [useGradientColor, setUseGradientColor] = useState(window.ipcRenderer.getStore<boolean>("useGradientColor"))
     const [gradientColorFrom, setGradientColorFrom] = useState(window.ipcRenderer.getStore<RgbaColor>("gradientColorFrom"))
     const [gradientColorTo, setGradientColorTo] = useState(window.ipcRenderer.getStore<RgbaColor>("gradientColorTo"))
+    const [openAtLogin, setOpenAtLogin] = useState(window.ipcRenderer.getStore<boolean>("openAtLogin"))
     const backgroundColorString = useMemo(() => `rgba(${backgroundColor.r},${backgroundColor.g},${backgroundColor.b},${backgroundColor.a})`, [backgroundColor])
     const gradientColorString = useMemo(() =>
         `linear-gradient(to right, 
@@ -30,29 +31,34 @@ export default function OptionsPage() {
         function fontSizeHasChanged(e: IpcRendererEvent, data: number) {
             setFontSize(data)
         }
-        function backgroundColorChanged(e: IpcRendererEvent, data: RgbaColor) {
+        function backgroundColorHasChanged(e: IpcRendererEvent, data: RgbaColor) {
             setBackgroundColor(data)
         }
-        function useGradientColorChanged(e: IpcRendererEvent, data: boolean) {
+        function useGradientColorHasChanged(e: IpcRendererEvent, data: boolean) {
             setUseGradientColor(data)
         }
-        function gradientColorFromChanged(e: IpcRendererEvent, data: RgbaColor) {
+        function gradientColorFromHasChanged(e: IpcRendererEvent, data: RgbaColor) {
             setGradientColorFrom(data)
         }
-        function gradientColorToChanged(e: IpcRendererEvent, data: RgbaColor) {
+        function gradientColorToHasChanged(e: IpcRendererEvent, data: RgbaColor) {
             setGradientColorTo(data)
         }
+        function openAtLoginHasChanged(e: IpcRendererEvent, data: boolean) {
+            setOpenAtLogin(data)
+        }
         window.ipcRenderer.addListener("fontSizeHasChanged", fontSizeHasChanged)
-        window.ipcRenderer.addListener("backgroundColorHasChanged", backgroundColorChanged)
-        window.ipcRenderer.addListener("useGradientColorHasChanged", useGradientColorChanged)
-        window.ipcRenderer.addListener("gradientColorFromHasChanged", gradientColorFromChanged)
-        window.ipcRenderer.addListener("gradientColorToHasChanged", gradientColorToChanged)
+        window.ipcRenderer.addListener("backgroundColorHasChanged", backgroundColorHasChanged)
+        window.ipcRenderer.addListener("useGradientColorHasChanged", useGradientColorHasChanged)
+        window.ipcRenderer.addListener("gradientColorFromHasChanged", gradientColorFromHasChanged)
+        window.ipcRenderer.addListener("gradientColorToHasChanged", gradientColorToHasChanged)
+        window.ipcRenderer.addListener("openAtLoginHasChanged", openAtLoginHasChanged)
         return () => {
             window.ipcRenderer.removeListener("fontSizeHasChanged", fontSizeHasChanged)
-            window.ipcRenderer.removeListener("backgroundColorHasChanged", backgroundColorChanged)
-            window.ipcRenderer.removeListener("useGradientColorHasChanged", useGradientColorChanged)
-            window.ipcRenderer.removeListener("gradientColorFromHasChanged", gradientColorFromChanged)
-            window.ipcRenderer.removeListener("gradientColorToHasChanged", gradientColorToChanged)
+            window.ipcRenderer.removeListener("backgroundColorHasChanged", backgroundColorHasChanged)
+            window.ipcRenderer.removeListener("useGradientColorHasChanged", useGradientColorHasChanged)
+            window.ipcRenderer.removeListener("gradientColorFromHasChanged", gradientColorFromHasChanged)
+            window.ipcRenderer.removeListener("gradientColorToHasChanged", gradientColorToHasChanged)
+            window.ipcRenderer.removeListener("openAtLoginHasChanged", openAtLoginHasChanged)
         }
     }, [])
 
@@ -70,6 +76,17 @@ export default function OptionsPage() {
         window.ipcRenderer.send("setUseGradientColor", event.target.checked)
     }
 
+    const handleSetOpenAtLogin = (event: React.ChangeEvent<HTMLInputElement>) => {
+        window.ipcRenderer.send("setOpenAtLogin", event.target.checked)
+        setOpenAtLogin(event.target.checked)
+    }
+
+    const handleRadioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const value = event.target.value
+        window.ipcRenderer.send("setMode", value)
+        setMode(value)
+    }
+
     function handleSetBackgroundColor(i: RgbaColor) {
         window.ipcRenderer.send("setBackgroundColor", i)
     }
@@ -80,12 +97,6 @@ export default function OptionsPage() {
 
     function handleSetGradientColorTo(i: RgbaColor) {
         window.ipcRenderer.send("setGradientColorTo", i)
-    }
-
-    const handleRadioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const value = event.target.value
-        window.ipcRenderer.send("setMode", value)
-        setMode(value)
     }
 
     return (
@@ -100,6 +111,13 @@ export default function OptionsPage() {
             }}
         >
             <List sx={{ width: "50%", margin: "auto", flex: 0 }}>
+                <ListItem sx={{ display: "flex", justifyContent: "space-between" }}>
+                    <Typography>Open on startup:</Typography>
+                    <Switch
+                        checked={openAtLogin}
+                        onChange={handleSetOpenAtLogin}
+                    />
+                </ListItem>
                 <ListItem sx={{ display: "flex", justifyContent: "space-between" }}>
                     <Typography>Theme:</Typography>
                     <FormControl>
