@@ -419,8 +419,8 @@ if (handleSquirrelEvent(app)) {
   function setStartUpWindow() {
     startupWindow = new BrowserWindow({
       icon: "public/favicon.ico",
-      height: 400,
-      width: 400,
+      height: 300,
+      width: 300,
       resizable: false,
       webPreferences: {
         devTools: !app.isPackaged
