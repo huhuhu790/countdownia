@@ -135,8 +135,8 @@ export default function Home() {
         let height = document.documentElement.clientHeight
         const width = document.documentElement.clientWidth
         height = current ? height + dragBar : height - dragBar
-        window.ipcRenderer.send("setWindowSize", width, height)
         window.ipcRenderer.send("setResizable", current)
+        window.ipcRenderer.send("setWindowSize", width, height)
     }
 
     function handleContextMenu(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {

@@ -19,7 +19,6 @@
     }
   },
   "include": [
-    "src/**/*",
-    "renderer.d.ts"
+    "src/**/*"
   ]
 }

@@ -36,18 +36,17 @@ interface StoreType {
 
 declare const COUNTDOWN_WEBPACK_ENTRY: string
 declare const COUNTDOWN_PRELOAD_WEBPACK_ENTRY: string
-
 declare const CONFIG_WEBPACK_ENTRY: string
 declare const CONFIG_PRELOAD_WEBPACK_ENTRY: string
-
 declare const STARTUP_WEBPACK_ENTRY: string
 
-const WM_INITMENU = 0x0116;
-const configWindowHeight = 700
-const configWindowWidth = 1200
+const WM_INITMENU = 0x0116
 
-const homeWindowHeight = 100
+const configWindowWidth = 1200
+const configWindowHeight = 700
+
 const homeWindowWidth = 80
+const homeWindowHeight = 80
 
 const dragBar = 24
 
@@ -70,8 +69,8 @@ if (handleSquirrelEvent(app)) {
       size: {
         type: "object",
         default: {
-          width: 800,
-          height: 100 - dragBar
+          width: 1200,
+          height: homeWindowHeight
         }
       },
       countdownDate: {
@@ -219,6 +218,7 @@ if (handleSquirrelEvent(app)) {
     {
       label: "配置",
       click() {
+        configWindow.focus()
         configWindow.show()
       }
     },
@@ -237,6 +237,7 @@ if (handleSquirrelEvent(app)) {
     tray.setContextMenu(contextMenu)
     tray
       .addListener("click", () => {
+        homeWindow.focus()
         homeWindow.show()
       })
       .setToolTip("Countdownia")
@@ -250,6 +251,10 @@ if (handleSquirrelEvent(app)) {
       })
       .on("setResizable", (event, canResize) => {
         homeWindow.resizable = canResize
+        if (canResize)
+          homeWindow.setMinimumSize(homeWindowWidth, homeWindowHeight + dragBar)
+        else
+          homeWindow.setMinimumSize(homeWindowWidth, homeWindowHeight)
       })
       .on("setAlwaysOnTop", (event, status) => {
         homeWindow.setAlwaysOnTop(status)
@@ -307,6 +312,7 @@ if (handleSquirrelEvent(app)) {
 
   /*************** window ***************/
   function setHomeWindow() {
+    startupWindow.showInactive()
     const size = store.get("size")
     const position = store.get("position")
     const alwaysOnTop = store.get("alwaysOnTop")
@@ -314,7 +320,7 @@ if (handleSquirrelEvent(app)) {
       icon: "public/favicon.ico",
       height: size.height,
       width: size.width,
-      minHeight: homeWindowHeight - dragBar,
+      minHeight: homeWindowHeight,
       minWidth: homeWindowWidth,
       x: position.x,
       y: position.y,
@@ -336,8 +342,8 @@ if (handleSquirrelEvent(app)) {
         setContextMenu()
         setTimeout(() => {
           startupWindow.hide()
-          homeWindow.show()
           homeWindow.focus()
+          homeWindow.show()
         }, 3000)
       })
       .addListener("close", (event) => {
@@ -426,7 +432,7 @@ if (handleSquirrelEvent(app)) {
         devTools: !app.isPackaged
       },
       fullscreenable: false,
-      show: true,
+      show: false,
       transparent: true,
       frame: false,
       skipTaskbar: true,
