@@ -45,8 +45,8 @@ const config: ForgeConfig = {
           },
           {
             html: "./src/index.html",
-            js: "./src/app/startup/main.tsx",
-            name: "startup"
+            js: "./src/app/loading/main.tsx",
+            name: "loading"
           },
         ],
       },

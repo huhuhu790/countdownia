@@ -4,7 +4,6 @@ import {
     Switch, Divider, RadioGroup,
     Radio, FormControl, FormControlLabel
 } from "@mui/material"
-import type { IpcRendererEvent } from "electron"
 import { useEffect, useMemo, useState } from "react"
 import { ColorPicker } from "../../components/ColorPicker"
 import { RgbaColor } from "react-colorful"
@@ -28,22 +27,22 @@ export default function OptionsPage() {
     )
 
     useEffect(() => {
-        function fontSizeHasChanged(e: IpcRendererEvent, data: number) {
+        function fontSizeHasChanged(_: unknown, data: number) {
             setFontSize(data)
         }
-        function backgroundColorHasChanged(e: IpcRendererEvent, data: RgbaColor) {
+        function backgroundColorHasChanged(_: unknown, data: RgbaColor) {
             setBackgroundColor(data)
         }
-        function useGradientColorHasChanged(e: IpcRendererEvent, data: boolean) {
+        function useGradientColorHasChanged(_: unknown, data: boolean) {
             setUseGradientColor(data)
         }
-        function gradientColorFromHasChanged(e: IpcRendererEvent, data: RgbaColor) {
+        function gradientColorFromHasChanged(_: unknown, data: RgbaColor) {
             setGradientColorFrom(data)
         }
-        function gradientColorToHasChanged(e: IpcRendererEvent, data: RgbaColor) {
+        function gradientColorToHasChanged(_: unknown, data: RgbaColor) {
             setGradientColorTo(data)
         }
-        function openAtLoginHasChanged(e: IpcRendererEvent, data: boolean) {
+        function openAtLoginHasChanged(_: unknown, data: boolean) {
             setOpenAtLogin(data)
         }
         window.ipcRenderer.addListener("fontSizeHasChanged", fontSizeHasChanged)

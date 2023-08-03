@@ -5,7 +5,6 @@ import LockOpenIcon from "@mui/icons-material/LockOpen"
 import DragHandleIcon from "@mui/icons-material/DragHandle"
 import NearMeIcon from "@mui/icons-material/NearMe"
 import NearMeOutlinedIcon from "@mui/icons-material/NearMeOutlined"
-import type { IpcRendererEvent } from "electron"
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward"
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward"
 import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown"
@@ -105,7 +104,7 @@ export default function Home() {
     }, [countdownDate])
 
     useEffect(() => {
-        function countdownDateHasChanged(e: IpcRendererEvent, data: DateList) {
+        function countdownDateHasChanged(_: unknown, data: DateList) {
             setCountdownDate(data)
         }
         window.ipcRenderer.addListener("hide", handleBlur)
@@ -360,19 +359,19 @@ const Content = forwardRef<ContentRef, ContentProps>(function Content({
 
     useImperativeHandle(ref, () => ({ swiperRef: swiperRef.current }), [])
     useEffect(() => {
-        function fontSizeChanged(e: IpcRendererEvent, data: number) {
+        function fontSizeChanged(_: unknown, data: number) {
             setFontSize(data)
         }
-        function backgroundChanged(e: IpcRendererEvent, data: RgbaColor) {
+        function backgroundChanged(_: unknown, data: RgbaColor) {
             setBackgroundColor(data)
         }
-        function useGradientColorChanged(e: IpcRendererEvent, data: boolean) {
+        function useGradientColorChanged(_: unknown, data: boolean) {
             setUseGradientColor(data)
         }
-        function gradientColorFromChanged(e: IpcRendererEvent, data: RgbaColor) {
+        function gradientColorFromChanged(_: unknown, data: RgbaColor) {
             setGradientColorFrom(data)
         }
-        function gradientColorToChanged(e: IpcRendererEvent, data: RgbaColor) {
+        function gradientColorToChanged(_: unknown, data: RgbaColor) {
             setGradientColorTo(data)
         }
         swiperRef.current.autoplay.start()

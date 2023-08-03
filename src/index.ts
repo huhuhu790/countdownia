@@ -38,7 +38,7 @@ declare const COUNTDOWN_WEBPACK_ENTRY: string
 declare const COUNTDOWN_PRELOAD_WEBPACK_ENTRY: string
 declare const CONFIG_WEBPACK_ENTRY: string
 declare const CONFIG_PRELOAD_WEBPACK_ENTRY: string
-declare const STARTUP_WEBPACK_ENTRY: string
+declare const LOADING_WEBPACK_ENTRY: string
 
 const WM_INITMENU = 0x0116
 
@@ -52,7 +52,7 @@ const dragBar = 24
 
 let configWindow: BrowserWindow = null!,
   homeWindow: BrowserWindow = null!,
-  startupWindow: BrowserWindow = null!,
+  loadingWindow: BrowserWindow = null!,
   tray: Tray = null!,
   store: Store<StoreType> = null!,
   contextMenu: Menu = null!
@@ -202,25 +202,28 @@ if (handleSquirrelEvent(app)) {
   // 设置菜单列表
   contextMenu = Menu.buildFromTemplate([
     {
-      label: "重置位置",
-      click: reset
-    },
-    {
-      label: "重启",
-      click() {
-        app.relaunch()
-        exitApp()
-      }
-    },
-    {
-      type: "separator"
-    },
-    {
       label: "配置",
       click() {
         configWindow.focus()
         configWindow.show()
       }
+    },
+    {
+      label: "系统",
+      type: "submenu",
+      submenu: [
+        {
+          label: "重置位置",
+          click: reset
+        },
+        {
+          label: "重启",
+          click() {
+            app.relaunch()
+            exitApp()
+          }
+        }
+      ]
     },
     {
       type: "separator"
@@ -311,11 +314,10 @@ if (handleSquirrelEvent(app)) {
   }
 
   /*************** window ***************/
+  const size = store.get("size")
+  const position = store.get("position")
+  const alwaysOnTop = store.get("alwaysOnTop")
   function setHomeWindow() {
-    startupWindow.showInactive()
-    const size = store.get("size")
-    const position = store.get("position")
-    const alwaysOnTop = store.get("alwaysOnTop")
     homeWindow = new BrowserWindow({
       icon: "public/favicon.ico",
       height: size.height,
@@ -339,11 +341,11 @@ if (handleSquirrelEvent(app)) {
     })
     homeWindow
       .once("ready-to-show", () => {
-        setContextMenu()
         setTimeout(() => {
-          startupWindow.hide()
+          loadingWindow.close()
           homeWindow.focus()
           homeWindow.show()
+          setContextMenu()
         }, 3000)
       })
       .addListener("close", (event) => {
@@ -352,9 +354,11 @@ if (handleSquirrelEvent(app)) {
       })
       .addListener("minimize", () => {
         homeWindow.webContents.send("hide")
+        homeWindow.restore()
       })
       .addListener("focus", () => {
         homeWindow.webContents.send("show")
+        homeWindow.show()
       })
       .addListener("blur", () => {
         homeWindow.webContents.send("hide")
@@ -422,8 +426,8 @@ if (handleSquirrelEvent(app)) {
     configWindow.loadURL(CONFIG_WEBPACK_ENTRY)
   }
 
-  function setStartUpWindow() {
-    startupWindow = new BrowserWindow({
+  function setLoadingWindow() {
+    loadingWindow = new BrowserWindow({
       icon: "public/favicon.ico",
       height: 300,
       width: 300,
@@ -432,7 +436,6 @@ if (handleSquirrelEvent(app)) {
         devTools: !app.isPackaged
       },
       fullscreenable: false,
-      show: false,
       transparent: true,
       frame: false,
       skipTaskbar: true,
@@ -441,12 +444,12 @@ if (handleSquirrelEvent(app)) {
       alwaysOnTop: true
     })
 
-    startupWindow.loadURL(STARTUP_WEBPACK_ENTRY)
+    loadingWindow.loadURL(LOADING_WEBPACK_ENTRY)
   }
 
   /*************** app ***************/
   const createWindow = () => {
-    setStartUpWindow()
+    setLoadingWindow()
     setHomeWindow()
     setConfigWindow()
     setEvent()

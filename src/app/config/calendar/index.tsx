@@ -4,7 +4,6 @@ import {
 } from "@mui/material"
 import CalendarArea, { CalendarAreaRef } from "./CalendarArea"
 import { Fragment, useEffect, useRef, useState } from "react"
-import type { IpcRendererEvent } from "electron"
 import FormDialog, { FormDialogRef } from "./FormDialog"
 import dayjs from "dayjs"
 import ScrollTop from "../../components/ScrollTop"
@@ -19,7 +18,7 @@ export default function CalendarPage() {
     const formDialogRef = useRef<FormDialogRef>()
 
     useEffect(() => {
-        function countdownDateHasChanged(e: IpcRendererEvent, data: DateList) {
+        function countdownDateHasChanged(_: unknown, data: DateList) {
             setCountdownDate(data)
         }
         window.ipcRenderer.addListener("countdownDateHasChanged", countdownDateHasChanged)
