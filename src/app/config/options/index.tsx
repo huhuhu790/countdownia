@@ -1,8 +1,9 @@
 import {
-    ListItem, List, Paper,
+    ListItem, List,
     Typography, TextField, Box,
     Switch, Divider, RadioGroup,
-    Radio, FormControl, FormControlLabel
+    Radio, FormControl, FormControlLabel,
+    useTheme
 } from "@mui/material"
 import { useEffect, useMemo, useState } from "react"
 import { ColorPicker } from "../../components/ColorPicker"
@@ -99,8 +100,7 @@ export default function OptionsPage() {
     }
 
     return (
-        <Paper
-            elevation={2}
+        <Box
             sx={{
                 py: 4,
                 height: "100%",
@@ -109,7 +109,13 @@ export default function OptionsPage() {
                 flexDirection: "column"
             }}
         >
-            <List sx={{ width: "50%", margin: "auto", flex: 0 }}>
+            <List
+                sx={{
+                    width: "50%",
+                    margin: "auto",
+                    flex: 0
+                }}
+            >
                 <ListItem sx={{ display: "flex", justifyContent: "space-between" }}>
                     <Typography>Open on startup:</Typography>
                     <Switch
@@ -178,21 +184,27 @@ export default function OptionsPage() {
             </List>
             <Box
                 sx={{
-                    fontSize: fontSize + "px",
-                    background: useGradientColor ? gradientColorString : backgroundColorString,
-                    backgroundClip: "text",
-                    color: "transparent",
-                    textAlign: "left",
-                    flexGrow: 1,
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    mx: 8
+                    mx: 4,
+                    borderRadius: 5
                 }}
             >
-                The quick brown fox jumps over the lazy dog<br />
-                距离$title还有$d天$h时$m分$s秒
+                <Box
+                    sx={{
+                        fontSize: fontSize + "px",
+                        background: useGradientColor ? gradientColorString : backgroundColorString,
+                        backgroundClip: "text",
+                        color: "transparent",
+                        textAlign: "left",
+                        flexGrow: 1,
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                    }}
+                >
+                    The quick brown fox jumps over the lazy dog<br />
+                    距离$title还有$d天$h时$m分$s秒
+                </Box>
             </Box>
-        </Paper >
+        </Box >
     )
 }

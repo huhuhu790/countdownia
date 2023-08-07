@@ -2,11 +2,11 @@ import {
   app,
   autoUpdater,
   BrowserWindow,
-  dialog,
   ipcMain,
   Menu,
   nativeImage,
   nativeTheme,
+  type NativeTheme,
   Tray
 } from "electron"
 import Store from "electron-store"
@@ -14,6 +14,8 @@ import { handleSquirrelEvent } from "./utils/handleSquirrelEvent"
 import { randomUUID } from "crypto"
 import path from "node:path"
 import type { RgbaColor } from "react-colorful"
+import { Dialogs } from "./utils/dialogs"
+import { DIALOG_NAMES } from "./utils/dialogNames"
 
 interface StoreType {
   size: {
@@ -38,6 +40,8 @@ declare const COUNTDOWN_WEBPACK_ENTRY: string
 declare const COUNTDOWN_PRELOAD_WEBPACK_ENTRY: string
 declare const CONFIG_WEBPACK_ENTRY: string
 declare const CONFIG_PRELOAD_WEBPACK_ENTRY: string
+declare const DIALOGS_WEBPACK_ENTRY: string
+declare const DIALOGS_PRELOAD_WEBPACK_ENTRY: string
 declare const LOADING_WEBPACK_ENTRY: string
 
 const WM_INITMENU = 0x0116
@@ -45,24 +49,35 @@ const WM_INITMENU = 0x0116
 const configWindowWidth = 1200
 const configWindowHeight = 700
 
-const homeWindowWidth = 80
-const homeWindowHeight = 80
+const countdownWindowWidth = 80
+const countdownWindowHeight = 80
 
 const dragBar = 24
 
+const darkTitleBar = {
+  color: "rgba(0,0,0,0)",
+  symbolColor: "white",
+  height: 32
+}
+
+const lightTitleBar = {
+  color: "rgba(0,0,0,0)",
+  symbolColor: "black",
+  height: 32
+}
+
 let configWindow: BrowserWindow = null!,
-  homeWindow: BrowserWindow = null!,
+  countdownWindow: BrowserWindow = null!,
   loadingWindow: BrowserWindow = null!,
   tray: Tray = null!,
   store: Store<StoreType> = null!,
   contextMenu: Menu = null!
 
-
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 // this should be placed at top of main.js to handle setup events quickly
-if (handleSquirrelEvent(app)) {
-  // squirrel event handled and app will exit in 1000ms, so don"t do anything else
-} else {
+if (!handleSquirrelEvent(app)) {
+  /*************** dialog **************/
+  const dialogs = new Dialogs({ url: DIALOGS_WEBPACK_ENTRY, preload: DIALOGS_PRELOAD_WEBPACK_ENTRY, app })
   /*************** store ***************/
   store = new Store<StoreType>({
     schema: {
@@ -70,7 +85,7 @@ if (handleSquirrelEvent(app)) {
         type: "object",
         default: {
           width: 1200,
-          height: homeWindowHeight
+          height: countdownWindowHeight
         }
       },
       countdownDate: {
@@ -101,7 +116,7 @@ if (handleSquirrelEvent(app)) {
       },
       alwaysOnTop: {
         type: "boolean",
-        default: false
+        default: true
       },
       fontSize: {
         type: "number",
@@ -145,46 +160,48 @@ if (handleSquirrelEvent(app)) {
     }
   })
 
-  store.onDidChange("fontSize", (newValue, oldValue) => {
-    homeWindow.webContents.send("fontSizeHasChanged", newValue)
-    configWindow.webContents.send("fontSizeHasChanged", newValue)
-  })
+  function setStore() {
+    store.onDidChange("fontSize", (newValue) => {
+      countdownWindow.webContents.send("fontSizeHasChanged", newValue)
+      configWindow.webContents.send("fontSizeHasChanged", newValue)
+    })
 
-  store.onDidChange("countdownDate", (newValue, oldValue) => {
-    homeWindow.webContents.send("countdownDateHasChanged", newValue)
-    configWindow.webContents.send("countdownDateHasChanged", newValue)
-  })
+    store.onDidChange("countdownDate", (newValue) => {
+      countdownWindow.webContents.send("countdownDateHasChanged", newValue)
+      configWindow.webContents.send("countdownDateHasChanged", newValue)
+    })
 
-  store.onDidChange("backgroundColor", (newValue, oldValue) => {
-    homeWindow.webContents.send("backgroundColorHasChanged", newValue)
-    configWindow.webContents.send("backgroundColorHasChanged", newValue)
-  })
+    store.onDidChange("backgroundColor", (newValue) => {
+      countdownWindow.webContents.send("backgroundColorHasChanged", newValue)
+      configWindow.webContents.send("backgroundColorHasChanged", newValue)
+    })
 
-  store.onDidChange("useGradientColor", (newValue, oldValue) => {
-    homeWindow.webContents.send("useGradientColorHasChanged", newValue)
-    configWindow.webContents.send("useGradientColorHasChanged", newValue)
-  })
+    store.onDidChange("useGradientColor", (newValue) => {
+      countdownWindow.webContents.send("useGradientColorHasChanged", newValue)
+      configWindow.webContents.send("useGradientColorHasChanged", newValue)
+    })
 
-  store.onDidChange("gradientColorFrom", (newValue, oldValue) => {
-    homeWindow.webContents.send("gradientColorFromHasChanged", newValue)
-    configWindow.webContents.send("gradientColorFromHasChanged", newValue)
-  })
+    store.onDidChange("gradientColorFrom", (newValue) => {
+      countdownWindow.webContents.send("gradientColorFromHasChanged", newValue)
+      configWindow.webContents.send("gradientColorFromHasChanged", newValue)
+    })
 
-  store.onDidChange("gradientColorTo", (newValue, oldValue) => {
-    homeWindow.webContents.send("gradientColorToHasChanged", newValue)
-    configWindow.webContents.send("gradientColorToHasChanged", newValue)
-  })
+    store.onDidChange("gradientColorTo", (newValue) => {
+      countdownWindow.webContents.send("gradientColorToHasChanged", newValue)
+      configWindow.webContents.send("gradientColorToHasChanged", newValue)
+    })
 
-  store.onDidChange("openAtLogin", (newValue, oldValue) => {
-    configWindow.webContents.send("openAtLoginHasChanged", newValue)
-  })
+    store.onDidChange("openAtLogin", (newValue) => {
+      configWindow.webContents.send("openAtLoginHasChanged", newValue)
+    })
+  }
 
   /*************** menu & tray ***************/
   function exitApp() {
     configWindow.hide()
-    homeWindow.hide()
+    countdownWindow.hide()
     configWindow.removeAllListeners()
-    homeWindow.removeAllListeners()
+    countdownWindow.removeAllListeners()
     app.quit()
   }
 
@@ -195,8 +212,21 @@ if (handleSquirrelEvent(app)) {
       "fontSize"
     )
     const size = store.get("size")
-    homeWindow.setSize(size.width, size.height)
-    homeWindow.center()
+    countdownWindow.setSize(size.width, size.height)
+    BrowserWindow.getAllWindows().forEach(i => {
+      i.center()
+    })
+    const bounds = countdownWindow.getBounds()
+    store.set("position", {
+      x: bounds.x,
+      y: bounds.y
+    })
+  }
+
+  function showWindow(window: BrowserWindow) {
+    window.restore()
+    window.focus()
+    window.show()
   }
 
   // 设置菜单列表
@@ -204,8 +234,7 @@ if (handleSquirrelEvent(app)) {
     {
       label: "配置",
       click() {
-        configWindow.focus()
-        configWindow.show()
+        showWindow(configWindow)
       }
     },
     {
@@ -240,27 +269,26 @@ if (handleSquirrelEvent(app)) {
     tray.setContextMenu(contextMenu)
     tray
       .addListener("click", () => {
-        homeWindow.focus()
-        homeWindow.show()
+        showWindow(countdownWindow)
       })
       .setToolTip("Countdownia")
   }
-
   /*************** event ***************/
   function setEvent() {
     ipcMain
-      .on("setWindowSize", (event, width, height) => {
-        homeWindow.setSize(width, height)
+      // home window
+      .on("setWindowSize", (event, width: number, height: number) => {
+        countdownWindow.setSize(width, height)
       })
-      .on("setResizable", (event, canResize) => {
-        homeWindow.resizable = canResize
+      .on("setResizable", (event, canResize: boolean) => {
+        countdownWindow.resizable = canResize
         if (canResize)
-          homeWindow.setMinimumSize(homeWindowWidth, homeWindowHeight + dragBar)
+          countdownWindow.setMinimumSize(countdownWindowWidth, countdownWindowHeight + dragBar)
         else
-          homeWindow.setMinimumSize(homeWindowWidth, homeWindowHeight)
+          countdownWindow.setMinimumSize(countdownWindowWidth, countdownWindowHeight)
       })
-      .on("setAlwaysOnTop", (event, status) => {
-        homeWindow.setAlwaysOnTop(status)
+      .on("setAlwaysOnTop", (event, status: boolean) => {
+        countdownWindow.setAlwaysOnTop(status)
         store.set("alwaysOnTop", status)
       })
       .on("setCountdownDate", (event, dateItem: DateItem) => {
@@ -278,52 +306,65 @@ if (handleSquirrelEvent(app)) {
         else countdownDate.splice(index, 1)
         store.set("countdownDate", countdownDate)
       })
-      .on("setFontSize", (event, fontSize) => {
+      .on("setFontSize", (event, fontSize: string) => {
         store.set("fontSize", fontSize)
       })
-      .on("setBackgroundColor", (event, backgroundColor) => {
+      .on("setBackgroundColor", (event, backgroundColor: string) => {
         store.set("backgroundColor", backgroundColor)
       })
-      .on("setUseGradientColor", (event, useGradientColor) => {
+      .on("setUseGradientColor", (event, useGradientColor: string) => {
         store.set("useGradientColor", useGradientColor)
       })
-      .on("setGradientColorFrom", (event, gradientColorFrom) => {
+      .on("setGradientColorFrom", (event, gradientColorFrom: string) => {
         store.set("gradientColorFrom", gradientColorFrom)
       })
-      .on("setGradientColorTo", (event, gradientColorTo) => {
+      .on("setGradientColorTo", (event, gradientColorTo: string) => {
         store.set("gradientColorTo", gradientColorTo)
       })
-      .on("setOpenAtLogin", (event, openAtLogin) => {
+      // app
+      .on("setOpenAtLogin", (event, openAtLogin: boolean) => {
         store.set("openAtLogin", openAtLogin)
         app.setLoginItemSettings({
           openAtLogin
         })
       })
-      .on("getStore", (event, name) => {
+      // store
+      .on("getStore", (event, name: string) => {
         event.returnValue = store.get(name)
       })
+      .on("getMode", (event) => {
+        event.returnValue = nativeTheme.themeSource
+      })
+      .on("setMode", (event, mode: NativeTheme["themeSource"]) => {
+        nativeTheme.themeSource = mode
+        configWindow.setTitleBarOverlay(nativeTheme.shouldUseDarkColors ? darkTitleBar : lightTitleBar)
+      })
+      // context menu
       .on("showCountdownContextMenu", (event) => {
         contextMenu.popup({ window: BrowserWindow.fromWebContents(event.sender)! })
       })
-      .on("getMode", (event, name) => {
-        event.returnValue = nativeTheme.themeSource
+      // dialog
+      .on("hideDialog", (event, type: DIALOG_NAMES) => {
+        dialogs.destroy(type)
       })
-      .on("setMode", (event, mode) => {
-        nativeTheme.themeSource = mode
+      .on("openDialog", (event, { type, height, width, ...extraInfo }: { type: DIALOG_NAMES, height?: number, width?: number }) => {
+        let parent: BrowserWindow
+        if (type.includes("config")) parent = configWindow
+        else if (type.includes("countdown")) parent = countdownWindow
+        dialogs.open({ type, parent, height, width, extraInfo })
       })
   }
-
-  /*************** window ***************/
-  const size = store.get("size")
-  const position = store.get("position")
-  const alwaysOnTop = store.get("alwaysOnTop")
-  function setHomeWindow() {
-    homeWindow = new BrowserWindow({
+  /*************** window **************/
+  function setCountdownWindow() {
+    const size = store.get("size")
+    const position = store.get("position")
+    const alwaysOnTop = store.get("alwaysOnTop")
+    countdownWindow = new BrowserWindow({
       icon: "public/favicon.ico",
       height: size.height,
       width: size.width,
-      minHeight: homeWindowHeight,
-      minWidth: homeWindowWidth,
+      minHeight: countdownWindowHeight,
+      minWidth: countdownWindowWidth,
       x: position.x,
       y: position.y,
       webPreferences: {
@@ -339,12 +380,11 @@ if (handleSquirrelEvent(app)) {
       minimizable: false,
       alwaysOnTop: alwaysOnTop
     })
-    homeWindow
+    countdownWindow
       .once("ready-to-show", () => {
         setTimeout(() => {
           loadingWindow.close()
-          homeWindow.focus()
-          homeWindow.show()
+          showWindow(countdownWindow)
           setContextMenu()
         }, 3000)
       })
@@ -353,25 +393,24 @@ if (handleSquirrelEvent(app)) {
         exitApp()
       })
       .addListener("minimize", () => {
-        homeWindow.webContents.send("hide")
-        homeWindow.restore()
+        countdownWindow.webContents.send("hide")
+        countdownWindow.restore()
       })
       .addListener("focus", () => {
-        homeWindow.webContents.send("show")
-        homeWindow.show()
+        countdownWindow.webContents.send("show")
       })
       .addListener("blur", () => {
-        homeWindow.webContents.send("hide")
+        countdownWindow.webContents.send("hide")
       })
       .addListener("resized", () => {
-        const bounds = homeWindow.getBounds()
+        const bounds = countdownWindow.getBounds()
         store.set("size", {
           width: bounds.width,
           height: bounds.height - dragBar
         })
       })
       .addListener("moved", () => {
-        const bounds = homeWindow.getBounds()
+        const bounds = countdownWindow.getBounds()
         store.set("position", {
           x: bounds.x,
           y: bounds.y
@@ -381,12 +420,10 @@ if (handleSquirrelEvent(app)) {
         e.preventDefault()
       })
       .hookWindowMessage(WM_INITMENU, () => {
-        homeWindow.setEnabled(false)
-        homeWindow.setEnabled(true)
-        contextMenu.popup({ window: homeWindow })
+        countdownWindow.setEnabled(false)
+        countdownWindow.setEnabled(true)
+        contextMenu.popup({ window: countdownWindow })
       })
-
-    homeWindow.loadURL(COUNTDOWN_WEBPACK_ENTRY)
   }
 
   function setConfigWindow() {
@@ -402,11 +439,7 @@ if (handleSquirrelEvent(app)) {
         devTools: !app.isPackaged
       },
       titleBarStyle: "hidden",
-      titleBarOverlay: {
-        color: "rgba(0,0,0,0)",
-        symbolColor: "white",
-        height: 32
-      },
+      titleBarOverlay: nativeTheme.shouldUseDarkColors ? darkTitleBar : lightTitleBar,
       show: false
     })
     configWindow
@@ -422,11 +455,9 @@ if (handleSquirrelEvent(app)) {
         configWindow.setEnabled(true)
         contextMenu.popup({ window: configWindow })
       })
-
-    configWindow.loadURL(CONFIG_WEBPACK_ENTRY)
   }
 
-  function setLoadingWindow() {
+  function setLoadingWindow(fuc: () => void) {
     loadingWindow = new BrowserWindow({
       icon: "public/favicon.ico",
       height: 300,
@@ -441,18 +472,24 @@ if (handleSquirrelEvent(app)) {
       skipTaskbar: true,
       maximizable: false,
       minimizable: false,
-      alwaysOnTop: true
+      alwaysOnTop: true,
     })
-
+    loadingWindow.on("ready-to-show", () => {
+      fuc()
+    })
     loadingWindow.loadURL(LOADING_WEBPACK_ENTRY)
   }
 
-  /*************** app ***************/
+  /*************** app ****************/
   const createWindow = () => {
-    setLoadingWindow()
-    setHomeWindow()
-    setConfigWindow()
-    setEvent()
+    setLoadingWindow(() => {
+      setCountdownWindow()
+      setConfigWindow()
+      setEvent()
+      setStore()
+      countdownWindow.loadURL(COUNTDOWN_WEBPACK_ENTRY)
+      configWindow.loadURL(CONFIG_WEBPACK_ENTRY)
+    })
   }
 
   app
@@ -465,6 +502,11 @@ if (handleSquirrelEvent(app)) {
     .on("activate", () => {
       if (BrowserWindow.getAllWindows().length === 0) {
         createWindow()
+      }
+    })
+    .on('second-instance', () => {
+      if (countdownWindow) {
+        showWindow(countdownWindow)
       }
     })
     .setLoginItemSettings({

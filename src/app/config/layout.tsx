@@ -1,7 +1,7 @@
 import {
     Avatar, Box, Divider,
     IconButton, List, ListItem,
-    Toolbar, Tooltip, Paper
+    Tooltip
 } from "@mui/material"
 import EventNoteIcon from "@mui/icons-material/EventNote"
 import BeachAccessIcon from "@mui/icons-material/BeachAccess"
@@ -13,11 +13,14 @@ const drawerWidth = 80
 
 function DragBar({ children }: { children?: React.ReactNode }) {
     return (
-        <div className={styles.titleBarContainer} onContextMenu={e => e.preventDefault}>
-            <div className={`${styles.titleBar} draggable`}>
+        <Box
+            className={styles.titleBarContainer}
+            onContextMenu={e => e.preventDefault}
+        >
+            <Box className={`${styles.titleBar} draggable`}>
                 {children}
-            </div>
-        </div>
+            </Box>
+        </Box>
     )
 }
 
@@ -36,16 +39,13 @@ const list = [
 function Drawer() {
     const nav = useNavigate()
     return (
-        <Paper
+        <Box
             sx={{
                 width: drawerWidth + "px",
                 height: "100%",
                 overflow: "auto"
             }}
         >
-            <Toolbar >
-            </Toolbar>
-            <Divider />
             <List>
                 {
                     list.map(i => (
@@ -59,12 +59,11 @@ function Drawer() {
                                     </Avatar>
                                 </Tooltip>
                             </ListItem>
-                            <Divider />
                         </Fragment>
                     ))
                 }
             </List>
-        </Paper>
+        </Box>
     )
 }
 

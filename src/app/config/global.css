@@ -1,7 +1,4 @@
-:root {
-    --fallback-title-bar-height: 40px;
-}
-
+@import url(../styles/drag.css);
 * {
     &::-webkit-scrollbar {
         width: 12px;
@@ -21,16 +18,4 @@
 
 body {
     overflow: hidden;
-}
-
-.draggable {
-    app-region: drag;
-    /* Pre-fix app-region during standardization process */
-    -webkit-app-region: drag;
-}
-
-.nonDraggable {
-    app-region: no-drag;
-    /* Pre-fix app-region during standardization process */
-    -webkit-app-region: no-drag;
 }

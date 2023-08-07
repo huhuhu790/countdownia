@@ -1,14 +1,13 @@
 .titleBarContainer {
-    height: env(titlebar-area-height, var(--fallback-title-bar-height));
+    height: env(titlebar-area-height);
     width: 100%;
-    background-color: #254B85;
 }
 
 .titleBar {
     display: flex;
     user-select: none;
     height: 100%;
-    width: env(titlebar-area-width, 100%);
+    width: env(titlebar-area-width);
     color: #FFFFFF;
     font-weight: bold;
     text-align: center;

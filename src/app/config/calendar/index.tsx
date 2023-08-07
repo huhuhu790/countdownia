@@ -1,21 +1,17 @@
 import {
-    AppBar, Box,
-    Toolbar, Paper, List, ListItem, Divider, ListItemText, Typography, Button
+    Box, List, ListItem, ListItemText, Typography
 } from "@mui/material"
 import CalendarArea, { CalendarAreaRef } from "./CalendarArea"
 import { Fragment, useEffect, useRef, useState } from "react"
-import FormDialog, { FormDialogRef } from "./FormDialog"
 import dayjs from "dayjs"
 import ScrollTop from "../../components/ScrollTop"
 
 const sideWidth = 280
-const appBarHeight = 64
 
 export default function CalendarPage() {
     const calendarAreaRef = useRef<CalendarAreaRef>()
     const parentRef = useRef<HTMLDivElement>()
     const [countdownDate, setCountdownDate] = useState(window.ipcRenderer.getStore<DateList>("countdownDate"))
-    const formDialogRef = useRef<FormDialogRef>()
 
     useEffect(() => {
         function countdownDateHasChanged(_: unknown, data: DateList) {
@@ -38,9 +34,7 @@ export default function CalendarPage() {
                 height: "100%"
             }}
         >
-            <FormDialog ref={formDialogRef} />
-            <Paper
-                elevation={2}
+            <Box
                 sx={{
                     width: sideWidth + "px",
                     height: "100%",
@@ -51,38 +45,28 @@ export default function CalendarPage() {
                     countdownDate={countdownDate}
                     dayGridMonth={dayGridMonth}
                 />
-            </Paper>
-            <Paper
-                elevation={2}
+            </Box>
+            <Box
                 sx={{
                     flex: 1,
                     position: "relative"
                 }}
             >
-                <AppBar
-                    position="sticky"
-                    sx={{
-                        height: appBarHeight
-                    }}
-                >
-                    <Toolbar ></Toolbar>
-                </AppBar>
                 <Box
                     ref={parentRef}
                     sx={{
                         width: "100%",
-                        height: `calc(100% - ${appBarHeight}px)`,
+                        height: "100%",
                         overflow: "auto"
                     }}
                 >
                     <div id="scroll-into"></div>
                     <CalendarArea
                         ref={calendarAreaRef}
-                        formDialogRef={formDialogRef}
                         countdownDate={countdownDate} />
                 </Box>
                 <ScrollTop bottom={12} right={24} el={parentRef} position="absolute" />
-            </Paper >
+            </Box >
         </Box>
     )
 }
@@ -95,56 +79,51 @@ function SideBar({
     dayGridMonth: CalendarAreaRef["dayGridMonth"]
 }) {
     return (
-        <>
-            <Toolbar>
-            </Toolbar>
-            <Box sx={{ cursor: "pointer" }}>
-                <List sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper", padding: 0 }}>
-                    {
-                        countdownDate.map(i => {
-                            const dateStart = dayjs(i.date)
-                            const startHour = dateStart.hour()
-                            const start = dateStart.format("YYYY-MM-DD") + (startHour > 0 ? `/${startHour}H` : "")
-                            let end = ""
-                            if (i.endDate) {
-                                const dateEnd = dayjs(i.endDate)
-                                const endHour = dateEnd.hour()
-                                end = dateEnd.format("YYYY-MM-DD") + (endHour > 0 ? `/${dateEnd}H` : "")
-                            }
-                            return (
-                                <Fragment key={i.id}>
-                                    <ListItem
-                                        alignItems="flex-start"
-                                        onClick={() => {
-                                            dayGridMonth(new Date(i.date))
-                                            location.hash = i.id
-                                        }}
-                                    >
-                                        <ListItemText
-                                            primary={i.title}
-                                            primaryTypographyProps={{ noWrap: true }}
-                                            secondaryTypographyProps={{ component: "div" }}
-                                            secondary={
-                                                <>
-                                                    <Typography
-                                                        variant="body2"
-                                                        color="text.primary"
-                                                        noWrap
-                                                    >
-                                                        {i.description ?? "..."}
-                                                    </Typography>
-                                                    {end ? `${start} To ${end}` : start}
-                                                </>
-                                            }
-                                        />
-                                    </ListItem>
-                                    <Divider />
-                                </Fragment>
-                            )
-                        })
-                    }
-                </List>
-            </Box>
-        </>
+        <Box sx={{ cursor: "pointer" }}>
+            <List sx={{ width: "100%", maxWidth: 360, padding: 0 }}>
+                {
+                    countdownDate.map(i => {
+                        const dateStart = dayjs(i.date)
+                        const startHour = dateStart.hour()
+                        const start = dateStart.format("YYYY-MM-DD") + (startHour > 0 ? `/${startHour}H` : "")
+                        let end = ""
+                        if (i.endDate) {
+                            const dateEnd = dayjs(i.endDate)
+                            const endHour = dateEnd.hour()
+                            end = dateEnd.format("YYYY-MM-DD") + (endHour > 0 ? `/${dateEnd}H` : "")
+                        }
+                        return (
+                            <Fragment key={i.id}>
+                                <ListItem
+                                    alignItems="flex-start"
+                                    onClick={() => {
+                                        dayGridMonth(new Date(i.date))
+                                        location.hash = i.id
+                                    }}
+                                >
+                                    <ListItemText
+                                        primary={i.title}
+                                        primaryTypographyProps={{ noWrap: true }}
+                                        secondaryTypographyProps={{ component: "div" }}
+                                        secondary={
+                                            <>
+                                                <Typography
+                                                    variant="body2"
+                                                    color="text.primary"
+                                                    noWrap
+                                                >
+                                                    {i.description ?? "..."}
+                                                </Typography>
+                                                {end ? `${start} To ${end}` : start}
+                                            </>
+                                        }
+                                    />
+                                </ListItem>
+                            </Fragment>
+                        )
+                    })
+                }
+            </List>
+        </Box>
     )
 }

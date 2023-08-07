@@ -1,6 +1,6 @@
 import {
-    Card, Box,
-    Button, ButtonGroup,
+    Box,
+    ButtonGroup,
     Typography,
     useTheme,
     Popper,
@@ -9,8 +9,10 @@ import {
     ClickAwayListener,
     MenuList,
     MenuItem,
-    Divider
+    Divider,
+    Button
 } from "@mui/material"
+import { Button as Button2 } from "@mui/material-next"
 import FullCalendar from "@fullcalendar/react"
 import dayGridPlugin from "@fullcalendar/daygrid"
 import timeGridPlugin from "@fullcalendar/timegrid"
@@ -24,7 +26,7 @@ import { EventClickArg, EventContentArg } from "@fullcalendar/core"
 import EventNoteIcon from "@mui/icons-material/EventNote"
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
 import "./CalendarArea.scss"
-import { FormDialogRef } from "./FormDialog"
+import { DIALOG_NAMES } from "../../../utils/dialogNames"
 
 const options = ["Month View", "Day View"]
 export interface CalendarAreaRef {
@@ -104,13 +106,7 @@ function SplitButton({
     }
 
     const handleClose = (event: Event) => {
-        if (
-            anchorRef.current &&
-            anchorRef.current.contains(event.target as HTMLElement)
-        ) {
-            return
-        }
-
+        if (anchorRef.current && anchorRef.current.contains(event.target as HTMLElement)) return
         setOpen(false)
     }
 
@@ -341,11 +337,9 @@ const CalendarToolBar = forwardRef<Ref, Props>(function CalendarToolBar({
 
 export default forwardRef<CalendarAreaRef, {
     countdownDate: DateList
-    formDialogRef: React.MutableRefObject<FormDialogRef>
 }
 >(function CalendarArea({
-    countdownDate,
-    formDialogRef
+    countdownDate
 }, ref) {
     const { palette } = useTheme()
     const fullCalendarRef = useRef<FullCalendar>()
@@ -357,11 +351,11 @@ export default forwardRef<CalendarAreaRef, {
     function onEventClick(info: EventClickArg) {
         info.jsEvent.preventDefault()
         info.jsEvent.stopPropagation()
-        formDialogRef.current.openDialog(false, info.event._def)
+        window.ipcRenderer.send("openDialog", { type: DIALOG_NAMES.CONFIG_FORM, height: 600, width: 600, info: info.event._def })
     }
 
     function onEventAdd() {
-        formDialogRef.current.openDialog(true)
+        window.ipcRenderer.send("openDialog", { type: DIALOG_NAMES.CONFIG_FORM, height: 600, width: 600 })
     }
 
     useImperativeHandle(
@@ -382,7 +376,7 @@ export default forwardRef<CalendarAreaRef, {
     })), [countdownDate])
 
     return (
-        <Card
+        <Box
             sx={{
                 px: 2,
                 pt: 4,
@@ -431,6 +425,6 @@ export default forwardRef<CalendarAreaRef, {
                     events={events}
                 />
             </Box>
-        </Card>
+        </Box>
     )
 })
