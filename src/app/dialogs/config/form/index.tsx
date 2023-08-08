@@ -75,7 +75,7 @@ export default function FormDialog() {
     return (
         <>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DialogTitle>{formTypeAdd ? "Add" : "Edit"}</DialogTitle>
+                <DialogTitle>{formTypeAdd ? "Add Event" : "Edit Event"}</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
                         To {formTypeAdd ? "add" : "edit"} an event, please enter the following infomation.

@@ -1,4 +1,4 @@
-import { Box, Fab, Fade, useScrollTrigger } from "@mui/material"
+import { Box, Fab, Fade } from "@mui/material"
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp"
 import { useEffect, useState } from "react"
 
@@ -43,6 +43,7 @@ export default function ScrollTop({ bottom, right, el, position }: ScrollTopProp
                     zIndex: 10
                 }}
                 style={{ bottom, right }}
+                aria-label="Back to the top of the page"
             >
                 <Fab size="small">
                     <KeyboardArrowUpIcon />

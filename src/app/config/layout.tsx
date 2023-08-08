@@ -1,5 +1,5 @@
 import {
-    Avatar, Box, Divider,
+    Avatar, Box,
     IconButton, List, ListItem,
     Tooltip
 } from "@mui/material"
@@ -10,6 +10,7 @@ import styles from "./layout.module.css"
 import { Fragment } from "react"
 
 const drawerWidth = 80
+const backgroundColor = "#254B85"
 
 function DragBar({ children }: { children?: React.ReactNode }) {
     return (
@@ -36,6 +37,7 @@ const list = [
         icon: <BeachAccessIcon />
     }
 ]
+
 function Drawer() {
     const nav = useNavigate()
     return (
@@ -43,7 +45,19 @@ function Drawer() {
             sx={{
                 width: drawerWidth + "px",
                 height: "100%",
-                overflow: "auto"
+                overflow: "auto",
+                "&::-webkit-scrollbar": {
+                    width: "12px",
+                    height: "12px"
+                },
+                "&::-webkit-scrollbar-track": {
+                    backgroundColor: "rgb(0 0 0 / 40%)",
+                    borderRadius: "20px"
+                },
+                "&::-webkit-scrollbar-thumb": {
+                    backgroundColor,
+                    borderRadius: "20px"
+                }
             }}
         >
             <List>
@@ -53,7 +67,7 @@ function Drawer() {
                             <ListItem sx={{ justifyContent: "center" }}>
                                 <Tooltip title={i.name} placement="right">
                                     <Avatar>
-                                        <IconButton color="inherit" onClick={() => nav(i.route)}>
+                                        <IconButton color="inherit" onClick={() => nav(i.route)} aria-label={i.name}>
                                             {i.icon}
                                         </IconButton>
                                     </Avatar>

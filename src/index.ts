@@ -529,7 +529,7 @@ if (!handleSquirrelEvent(app)) {
   //     title: "Application Update",
   //     message: process.platform === "win32" ? releaseNotes : releaseName,
   //     detail:
-  //       "A new version has been downloaded. Restart the application to apply the updates."
+  //       "A new version has been downloaded. Restart the application to apply the updates"
   //   })
   //     .then((returnValue) => {
   //       if (returnValue.response === 0) autoUpdater.quitAndInstall()

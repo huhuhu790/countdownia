@@ -33,6 +33,15 @@ export interface CalendarAreaRef {
     dayGridMonth: (date?: Date) => void
 }
 
+const background = {
+    light: "rgb(249 250 251)",
+    dark: "rgb(37 40 42)"
+}
+
+const weekColor = "rgb(107 114 128)"
+const eventHourColor = "rgb(107 114 128)"
+const eventHoverColor = "rgb(79 70 229)"
+
 function EventContent({ arg }: { arg: EventContentArg }) {
     return (
         <Box
@@ -41,9 +50,9 @@ function EventContent({ arg }: { arg: EventContentArg }) {
                 display: "flex",
                 width: "100%",
                 "&:hover": {
-                    color: "rgb(79 70 229)",
+                    color: eventHoverColor,
                     "& .eventTime": {
-                        color: "rgb(79 70 229)"
+                        color: eventHoverColor
                     }
                 }
             }}
@@ -65,7 +74,7 @@ function EventContent({ arg }: { arg: EventContentArg }) {
                         sx={{
                             flex: "none",
                             marginLeft: "0.75rem",
-                            color: "rgb(107 114 128)",
+                            color: eventHourColor,
                             fontSize: "1rem"
                         }}
                         className="eventTime"
@@ -118,6 +127,7 @@ function SplitButton({
                     size="small"
                     sx={{ padding: 0 }}
                     onClick={handleToggle}
+                    aria-label="change the view between day and month"
                 >
                     <ArrowDropDownIcon />
                 </Button>
@@ -277,7 +287,7 @@ const CalendarToolBar = forwardRef<Ref, Props>(function CalendarToolBar({
                 padding: 2
             }}
             style={{
-                background: palette.mode === "dark" ? "rgb(37 40 42)" : "rgb(249 250 251)"
+                background: background[palette.mode]
             }}
         >
             <Box flex={1}>
@@ -288,7 +298,7 @@ const CalendarToolBar = forwardRef<Ref, Props>(function CalendarToolBar({
                     showDay ?
                         <Typography
                             sx={{
-                                color: "rgb(107 114 128)",
+                                color: weekColor,
                                 fontSize: "0.875rem"
                             }}
                         >
@@ -302,19 +312,19 @@ const CalendarToolBar = forwardRef<Ref, Props>(function CalendarToolBar({
                     mr: 4,
                     "& button": { border: "none!important" }
                 }}>
-                <Button onClick={prevYear} sx={{ padding: 0 }}>
+                <Button onClick={prevYear} sx={{ padding: 0 }} aria-label="jump to previous year">
                     <KeyboardDoubleArrowLeftIcon />
                 </Button>
-                <Button onClick={prev} sx={{ padding: 0 }}>
+                <Button onClick={prev} sx={{ padding: 0 }} aria-label="jump to previous day">
                     <KeyboardArrowLeftIcon />
                 </Button>
-                <Button onClick={today} autoCapitalize="false">
+                <Button onClick={today} autoCapitalize="false" aria-label="jump to today">
                     Today
                 </Button>
-                <Button onClick={next} sx={{ padding: 0 }}>
+                <Button onClick={next} sx={{ padding: 0 }} aria-label="jump to next day">
                     <KeyboardArrowRightIcon />
                 </Button>
-                <Button onClick={nextYear} sx={{ padding: 0 }}>
+                <Button onClick={nextYear} sx={{ padding: 0 }} aria-label="jump to next year">
                     <KeyboardDoubleArrowRightIcon />
                 </Button>
             </ButtonGroup>
@@ -411,7 +421,7 @@ export default forwardRef<CalendarAreaRef, {
                     height="auto"
                     initialView="dayGridMonth"
                     navLinkDayClick={onDateClick}
-                    allDayContent={() => <EventNoteIcon />}
+                    allDayContent={() => <EventNoteIcon aria-label="full day" />}
                     selectable
                     navLinks
                     nowIndicator

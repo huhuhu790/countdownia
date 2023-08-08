@@ -1,4 +1,4 @@
-import { Box, CssBaseline } from "@mui/material"
+import { Box, Button, CssBaseline, IconButton } from "@mui/material"
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react"
 import LockIcon from "@mui/icons-material/Lock"
 import LockOpenIcon from "@mui/icons-material/LockOpen"
@@ -189,7 +189,7 @@ export default function Home() {
         </>
     )
 }
-const offset = 24
+
 function OperationBar({
     isFocus,
     isUnlock,
@@ -203,10 +203,8 @@ function OperationBar({
 }) {
     const wrapperRef = useRef<HTMLDivElement>()
     const contentRef = useRef<HTMLDivElement>()
-    const showArrowRef = useRef(false)
     const [isPlaying, setIsPlaying] = useState(true)
-    const [showArrowUp, setShowArrowUp] = useState(false)
-    const [showArrowDown, setShowArrowDown] = useState(false)
+    const [showArrow, setShowArrow] = useState(false)
     const [isAlwaysTop, setIsAlwaysTop] = useState(window.ipcRenderer.getStore<boolean>("alwaysOnTop"))
     function onPrev() {
         swiperRef.current.swiperRef.slidePrev()
@@ -225,32 +223,13 @@ function OperationBar({
         setIsAlwaysTop(newStatus)
         window.ipcRenderer.send("setAlwaysOnTop", newStatus)
     }
-    function scrollBit(top: number) {
-        wrapperRef.current.scrollBy({
-            top,
-            behavior: "smooth"
-        })
-    }
-    function onScroll() {
-        if (showArrowRef.current) {
-            if (wrapperRef.current.scrollTop === 0)
-                setShowArrowUp(false)
-            else setShowArrowUp(true)
-            if (wrapperRef.current.scrollTop + wrapperRef.current.offsetHeight === wrapperRef.current.scrollHeight)
-                setShowArrowDown(false)
-            else setShowArrowDown(true)
-        }
-    }
+
     useEffect(() => {
-        if (isFocus) {
             function resize() {
                 if (contentRef.current.offsetHeight > wrapperRef.current.offsetHeight) {
-                    showArrowRef.current = true
-                    setShowArrowDown(true)
+                    setShowArrow(true)
                 } else {
-                    setShowArrowUp(false)
-                    setShowArrowDown(false)
-                    showArrowRef.current = false
+                    setShowArrow(false)
                 }
             }
             resize()
@@ -258,8 +237,8 @@ function OperationBar({
             return () => {
                 window.removeEventListener("resize", resize)
             }
-        }
-    }, [isFocus])
+    }, [])
+    
     return (
         <Box
             sx={{
@@ -271,61 +250,51 @@ function OperationBar({
                 width: sideBar
             }}
             ref={wrapperRef}
-            onScroll={onScroll}
         >
             <Box ref={contentRef} sx={{ position: "relative" }}>
-                <Box
-                    className={styles.arrow}
-                    style={{
-                        display: showArrowUp ? "" : "none",
-                        top: 0,
-                        left: 0
-                    }}
-                    onClick={() => scrollBit(-offset)}
-                >
-                    <ArrowUpwardIcon fontSize="inherit" />
-                </Box>
-                <Box
+                <IconButton
                     className={styles.barItem}
                     onClick={() => handleLock()}
+                    aria-label="lock or unlock the showing area."
                 >
                     {isUnlock ? <LockOpenIcon fontSize="small" /> : <LockIcon fontSize="small" />}
-                </Box>
-                <Box
+                </IconButton>
+                <IconButton
                     className={styles.barItem}
                     onClick={handleAlwaysTop}
+                    aria-label="put the area on the top of all the windows or the other way."
                 >
                     {isAlwaysTop ? <NearMeIcon fontSize="small" /> : <NearMeOutlinedIcon fontSize="small" />}
-                </Box>
-                <Box
+                </IconButton>
+                <IconButton
                     className={styles.barItem}
                     onClick={onPrev}
+                    aria-hidden
                 >
                     <KeyboardDoubleArrowUpIcon fontSize="small" />
-                </Box>
-                <Box
+                </IconButton>
+                <IconButton
                     className={styles.barItem}
                     onClick={onPaused}
+                    aria-hidden
                 >
                     {isPlaying ? <PauseIcon fontSize="small" /> : <PlayArrowIcon fontSize="small" />}
-                </Box>
-                <Box
+                </IconButton>
+                <IconButton
                     className={styles.barItem}
                     onClick={onNext}
+                    aria-hidden
                 >
                     <KeyboardDoubleArrowDownIcon fontSize="small" />
-                </Box>
-                <Box
+                </IconButton>
+                <IconButton
                     className={styles.arrow}
                     style={{
-                        display: showArrowDown ? "" : "none",
-                        bottom: 0,
-                        left: 0
+                        display: showArrow ? "" : "none"
                     }}
-                    onClick={() => scrollBit(offset)}
                 >
                     <ArrowDownwardIcon fontSize="inherit" />
-                </Box>
+                </IconButton>
             </Box>
         </Box >
     )
