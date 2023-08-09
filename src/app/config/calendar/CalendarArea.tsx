@@ -12,7 +12,6 @@ import {
     Divider,
     Button
 } from "@mui/material"
-import { Button as Button2 } from "@mui/material-next"
 import FullCalendar from "@fullcalendar/react"
 import dayGridPlugin from "@fullcalendar/daygrid"
 import timeGridPlugin from "@fullcalendar/timegrid"
