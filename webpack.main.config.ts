@@ -1,5 +1,4 @@
 import type { Configuration } from "webpack"
-
 import { rules } from "./webpack.rules"
 import CopyPlugin from "copy-webpack-plugin"
 import path from "node:path"
@@ -25,6 +24,9 @@ export const mainConfig: Configuration = {
     }),
   ],
   resolve: {
+    alias: {
+      "@": path.resolve(__dirname, './src')
+    },
     extensions: [".js", ".ts"],
   },
 }

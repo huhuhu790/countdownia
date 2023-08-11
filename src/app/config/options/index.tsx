@@ -2,14 +2,14 @@ import {
     ListItem, List,
     Typography, TextField, Box,
     Switch, Divider, RadioGroup,
-    Radio, FormControl, FormControlLabel,
-    useTheme
+    Radio, FormControl, FormControlLabel
 } from "@mui/material"
 import { useEffect, useMemo, useState } from "react"
-import { ColorPicker } from "../../components/ColorPicker"
+import { ColorPicker } from "@/components/ColorPicker"
 import { RgbaColor } from "react-colorful"
 
 const maxFontSize = 300
+const minFontSize = 30
 
 export default function OptionsPage() {
     const [mode, setMode] = useState<string>(window.ipcRenderer.sendSync("getMode"))
@@ -67,6 +67,7 @@ export default function OptionsPage() {
         if (Number.isNaN(value) || value < 0) return
         if (value < 0) value = 0
         else if (value > maxFontSize) value = maxFontSize
+        else if (value < minFontSize) value = minFontSize
         setFontSize(value)
         window.ipcRenderer.send("setFontSize", value)
     }
@@ -102,20 +103,13 @@ export default function OptionsPage() {
     return (
         <Box
             sx={{
-                py: 4,
                 height: "100%",
+                width: "100%",
                 overflow: "auto",
-                display: "flex",
-                flexDirection: "column"
+                padding: 4
             }}
         >
-            <List
-                sx={{
-                    width: "50%",
-                    margin: "auto",
-                    flex: 0
-                }}
-            >
+            <List sx={{ mx: 6 }} >
                 <ListItem sx={{ display: "flex", justifyContent: "space-between" }}>
                     <Typography>Open on startup:</Typography>
                     <Switch
@@ -182,26 +176,33 @@ export default function OptionsPage() {
                     </Box>
                 </ListItem>
             </List>
-            <Box
-                sx={{
-                    mx: 4,
-                    borderRadius: 5
-                }}
-            >
+            <Box>
                 <Box
                     sx={{
+                        height: fontSize * 1.5,
                         fontSize: fontSize + "px",
                         background: useGradientColor ? gradientColorString : backgroundColorString,
                         backgroundClip: "text",
                         color: "transparent",
-                        textAlign: "left",
-                        flexGrow: 1,
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap"
                     }}
                 >
-                    The quick brown fox jumps over the lazy dog<br />
+                    The quick brown fox jumps over the lazy dog
+                </Box>
+                <Box
+                    sx={{
+                        height: fontSize * 1.5,
+                        fontSize: fontSize + "px",
+                        background: useGradientColor ? gradientColorString : backgroundColorString,
+                        backgroundClip: "text",
+                        color: "transparent",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap"
+                    }}
+                >
                     距离$title还有$d天$h时$m分$s秒
                 </Box>
             </Box>

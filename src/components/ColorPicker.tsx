@@ -1,8 +1,8 @@
 import { Box, Button, Input, Popover } from "@mui/material";
-import { debounce } from "lodash";
 import { useMemo, useState } from "react";
 import { RgbaColor, RgbaColorPicker } from "react-colorful";
 
+let timeout: number | null = null
 export function ColorPicker({
     backgroundColor,
     setBackgroundColor,
@@ -28,10 +28,13 @@ export function ColorPicker({
     const open = Boolean(anchorEl)
 
 
-    const setColor = debounce((color: RgbaColor) => {
-        setBackgroundColor(color)
-        setStore && setStore(color)
-    }, 200)
+    const setColor = (color: RgbaColor) => {
+        if (timeout) clearTimeout(timeout)
+        timeout = window.setTimeout(() => {
+            setBackgroundColor(color)
+            setStore && setStore(color)
+        }, 200)
+    }
 
     function changeColor(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, type: "r" | "g" | "b" | "a") {
         let value = Number(e.target.value)

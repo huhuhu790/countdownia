@@ -1,10 +1,10 @@
 import {
-    Box, List, ListItem, ListItemText, Typography
+    Box, List, ListItem, ListItemButton, ListItemText, Typography
 } from "@mui/material"
 import CalendarArea, { CalendarAreaRef } from "./CalendarArea"
-import { Fragment, useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import dayjs from "dayjs"
-import ScrollTop from "../../components/ScrollTop"
+import ScrollTop from "@/components/ScrollTop"
 
 const sideWidth = 280
 
@@ -31,7 +31,8 @@ export default function CalendarPage() {
         <Box
             sx={{
                 display: "flex",
-                height: "100%"
+                height: "100%",
+                width: "100%",
             }}
         >
             <Box
@@ -93,8 +94,8 @@ function SideBar({
                             end = dateEnd.format("YYYY-MM-DD") + (endHour > 0 ? `/${dateEnd}H` : "")
                         }
                         return (
-                            <Fragment key={i.id}>
-                                <ListItem
+                            <ListItem key={i.id} >
+                                <ListItemButton
                                     alignItems="flex-start"
                                     onClick={() => {
                                         dayGridMonth(new Date(i.date))
@@ -118,8 +119,8 @@ function SideBar({
                                             </>
                                         }
                                     />
-                                </ListItem>
-                            </Fragment>
+                                </ListItemButton>
+                            </ListItem>
                         )
                     })
                 }

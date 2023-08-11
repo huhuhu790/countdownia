@@ -9,7 +9,7 @@ export const plugins = [
   new CopyPlugin({
     patterns: [
       {
-        from: path.resolve(__dirname, "./assets"),
+        from: path.resolve(__dirname, "./src/assets"),
         to: "assets"
       },
     ],

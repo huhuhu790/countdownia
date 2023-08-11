@@ -12,7 +12,7 @@ import dayjs, { Dayjs } from "dayjs"
 import { Controller, useForm } from "react-hook-form"
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs"
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider"
-import { DIALOG_NAMES } from "../../../../utils/dialogNames"
+import { DIALOG_NAMES } from "@/utils/dialogNames"
 
 export interface FormDialogRef {
     openDialog: (isFormTypeAdd: boolean, currentEvent?: EventInput) => void

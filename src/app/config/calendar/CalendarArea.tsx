@@ -16,7 +16,7 @@ import FullCalendar from "@fullcalendar/react"
 import dayGridPlugin from "@fullcalendar/daygrid"
 import timeGridPlugin from "@fullcalendar/timegrid"
 import interactionPlugin from "@fullcalendar/interaction"
-import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from "react"
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react"
 import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft"
 import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArrowRight"
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft"
@@ -25,7 +25,9 @@ import { EventClickArg, EventContentArg } from "@fullcalendar/core"
 import EventNoteIcon from "@mui/icons-material/EventNote"
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
 import "./CalendarArea.scss"
-import { DIALOG_NAMES } from "../../../utils/dialogNames"
+import { DIALOG_NAMES } from "@/utils/dialogNames"
+import { useAtom } from "jotai"
+import { openDrawer } from "../jotai/atoms"
 
 const options = ["Month View", "Day View"]
 export interface CalendarAreaRef {
@@ -353,6 +355,7 @@ export default forwardRef<CalendarAreaRef, {
     const { palette } = useTheme()
     const fullCalendarRef = useRef<FullCalendar>()
     const CalendarToolBarRef = useRef<Ref>()
+    const [open, setOpen] = useAtom(openDrawer)
     function onDateClick(date: Date, jsEvent: UIEvent) {
         CalendarToolBarRef.current.timeGridDay(date)
     }
@@ -366,6 +369,12 @@ export default forwardRef<CalendarAreaRef, {
     function onEventAdd() {
         window.ipcRenderer.send("openDialog", { type: DIALOG_NAMES.CONFIG_FORM, height: 600, width: 600 })
     }
+
+    useEffect(() => {
+        setTimeout(() => {
+            fullCalendarRef.current.getApi().updateSize()
+        }, 300)
+    }, [open])
 
     useImperativeHandle(
         ref,

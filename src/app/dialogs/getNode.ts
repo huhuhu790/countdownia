@@ -1,5 +1,5 @@
 import { lazy, Fragment } from "react"
-import { DIALOG_NAMES } from "../../utils/dialogNames"
+import { DIALOG_NAMES } from "@/utils/dialogNames"
 
 const ConfigFormDialog = lazy(() => import("./config/form"))
 

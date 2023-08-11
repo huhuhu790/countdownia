@@ -1,5 +1,5 @@
 import type { Configuration } from "webpack"
-
+import path from "node:path"
 import { rules } from "./webpack.rules"
 import { plugins } from "./webpack.plugins"
 
@@ -30,6 +30,9 @@ export const rendererConfig: Configuration = {
   },
   plugins,
   resolve: {
+    alias: {
+      "@": path.resolve(__dirname, './src')
+    },
     extensions: [
       ".js",
       ".ts",

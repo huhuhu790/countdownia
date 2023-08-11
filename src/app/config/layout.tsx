@@ -1,15 +1,25 @@
 import {
     Avatar, Box,
+    Drawer,
     IconButton, List, ListItem,
-    Tooltip
+    ListItemButton,
+    ListItemIcon,
+    ListItemText,
+    Toolbar,
+    Tooltip,
+    useTheme
 } from "@mui/material"
 import EventNoteIcon from "@mui/icons-material/EventNote"
 import BeachAccessIcon from "@mui/icons-material/BeachAccess"
 import { Outlet, useNavigate } from "react-router-dom"
 import styles from "./layout.module.css"
-import { Fragment } from "react"
+import { useMemo } from "react"
+import MenuIcon from "@mui/icons-material/Menu"
+import { useAtom } from "jotai"
+import { openDrawer } from "./jotai/atoms"
 
-const drawerWidth = 80
+const openWidth = 280
+const shrinkWidth = 88
 const backgroundColor = "#254B85"
 
 function DragBar({ children }: { children?: React.ReactNode }) {
@@ -38,46 +48,73 @@ const list = [
     }
 ]
 
-function Drawer() {
+function CustomDrawer() {
     const nav = useNavigate()
+    const { transitions } = useTheme()
+    const [open, setOpen] = useAtom(openDrawer)
+    function changeDrawerOpen() {
+        setOpen(!open)
+    }
+    const transition = useMemo(() => transitions.create("width", {
+        easing: transitions.easing.sharp,
+        duration: transitions.duration.enteringScreen,
+    }), [transitions])
     return (
-        <Box
+        <Drawer
+            variant="permanent"
             sx={{
-                width: drawerWidth + "px",
+                flexShrink: 0,
                 height: "100%",
-                overflow: "auto",
-                "&::-webkit-scrollbar": {
-                    width: "12px",
-                    height: "12px"
-                },
-                "&::-webkit-scrollbar-track": {
-                    backgroundColor: "rgb(0 0 0 / 40%)",
-                    borderRadius: "20px"
-                },
-                "&::-webkit-scrollbar-thumb": {
-                    backgroundColor,
-                    borderRadius: "20px"
+                width: open ? openWidth : shrinkWidth,
+                transition,
+                "& .MuiDrawer-paper": {
+                    position: "initial",
+                    border: "none"
                 }
             }}
         >
+            <Toolbar
+                sx={{
+                    display: "flex",
+                    justifyContent: "flex-end"
+                }}
+            >
+                <IconButton onClick={changeDrawerOpen}>
+                    <MenuIcon />
+                </IconButton>
+            </Toolbar>
             <List>
                 {
                     list.map(i => (
-                        <Fragment key={i.name}>
-                            <ListItem sx={{ justifyContent: "center" }}>
-                                <Tooltip title={i.name} placement="right">
-                                    <Avatar>
-                                        <IconButton color="inherit" onClick={() => nav(i.route)} aria-label={i.name}>
+                        <ListItem sx={{ justifyContent: "center" }} key={i.name}>
+                            <ListItemButton
+                                sx={{
+                                    minHeight: 48,
+                                    justifyContent: open ? "initial" : "center",
+                                    px: 2.5,
+                                }}
+                                onClick={() => nav(i.route)}
+                            >
+                                <ListItemIcon
+                                    sx={{
+                                        minWidth: 0,
+                                        mr: open ? 3 : "auto",
+                                        justifyContent: "center",
+                                    }}
+                                >
+                                    <Tooltip title={i.name} placement="right" disableHoverListener={open}>
+                                        <Avatar>
                                             {i.icon}
-                                        </IconButton>
-                                    </Avatar>
-                                </Tooltip>
-                            </ListItem>
-                        </Fragment>
+                                        </Avatar>
+                                    </Tooltip>
+                                </ListItemIcon>
+                                <ListItemText primary={i.name} sx={{ opacity: open ? 1 : 0 }} />
+                            </ListItemButton>
+                        </ListItem>
                     ))
                 }
             </List>
-        </Box>
+        </Drawer>
     )
 }
 
@@ -88,10 +125,22 @@ export default function HomePage() {
             <Box
                 sx={{
                     display: "flex",
-                    height: "calc(100vh - env(titlebar-area-height, var(--fallback-title-bar-height)))"
+                    height: "calc(100vh - env(titlebar-area-height, var(--fallback-title-bar-height)))",
+                    "*::-webkit-scrollbar": {
+                        width: "12px",
+                        height: "12px"
+                    },
+                    "*::-webkit-scrollbar-track": {
+                        backgroundColor: "rgb(0 0 0 / 40%)",
+                        borderRadius: "20px"
+                    },
+                    "*::-webkit-scrollbar-thumb": {
+                        backgroundColor,
+                        borderRadius: "20px"
+                    }
                 }}
             >
-                <Drawer />
+                <CustomDrawer />
                 <Box sx={{ flex: 1 }} >
                     <Outlet />
                 </Box>

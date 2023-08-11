@@ -37,16 +37,19 @@ dependencies:
     version: 5.14.4(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@types/react@18.2.19)(react-dom@18.2.0)(react@18.2.0)
   '@mui/x-date-pickers':
     specifier: ^6.11.0
-    version: 6.11.0(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@mui/base@5.0.0-beta.9)(@mui/material@5.14.4)(@mui/system@5.14.3)(dayjs@1.11.9)(react-dom@18.2.0)(react@18.2.0)
+    version: 6.11.0(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@mui/base@5.0.0-beta.10)(@mui/material@5.14.4)(@mui/system@5.14.4)(dayjs@1.11.9)(react-dom@18.2.0)(react@18.2.0)
   dayjs:
     specifier: ^1.11.9
     version: registry.npmmirror.com/dayjs@1.11.9
+  electron-squirrel-startup:
+    specifier: ^1.0.0
+    version: 1.0.0
   electron-store:
     specifier: ^8.1.0
     version: registry.npmmirror.com/electron-store@8.1.0
-  lodash:
-    specifier: ^4.17.21
-    version: registry.npmmirror.com/lodash@4.17.21
+  jotai:
+    specifier: ^2.3.1
+    version: 2.3.1(@types/react@18.2.19)(react@18.2.0)
   notistack:
     specifier: ^3.0.1
     version: registry.npmmirror.com/notistack@3.0.1(csstype@3.1.2)(react-dom@18.2.0)(react@18.2.0)
@@ -88,9 +91,6 @@ devDependencies:
   '@electron-forge/shared-types':
     specifier: ^6.3.0
     version: 6.3.0
-  '@types/lodash':
-    specifier: ^4.14.196
-    version: registry.npmmirror.com/@types/lodash@4.14.196
   '@types/react':
     specifier: ^18.2.19
     version: 18.2.19
@@ -662,30 +662,6 @@ packages:
       react-is: 18.2.0
     dev: false
 
-  /@mui/base@5.0.0-beta.9(@types/react@18.2.19)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-gm6gnPnc/lS5Z3neH0iuOrK7IbS02+oh6KsMtXYLhI6bJpHs+PNWFsBmISx7x4FSPVJZvZkb8Bw6pEXpIMFt7Q==}
-    engines: {node: '>=12.0.0'}
-    peerDependencies:
-      '@types/react': ^17.0.0 || ^18.0.0
-      react: ^17.0.0 || ^18.0.0
-      react-dom: ^17.0.0 || ^18.0.0
-    peerDependenciesMeta:
-      '@types/react':
-        optional: true
-    dependencies:
-      '@babel/runtime': 7.22.6
-      '@emotion/is-prop-valid': 1.2.1
-      '@mui/types': 7.2.4(@types/react@18.2.19)
-      '@mui/utils': 5.14.3(react@18.2.0)
-      '@popperjs/core': 2.11.8
-      '@types/react': 18.2.19
-      clsx: 2.0.0
-      prop-types: 15.8.1
-      react: registry.npmmirror.com/react@18.2.0
-      react-dom: registry.npmmirror.com/react-dom@18.2.0(react@18.2.0)
-      react-is: 18.2.0
-    dev: false
-
   /@mui/core-downloads-tracker@5.14.4:
     resolution: {integrity: sha512-pW2XghSi3hpYKX57Wu0SCWMTSpzvXZmmucj3TcOJWaCiFt4xr05w2gcwBZi36dAp9uvd9//9N51qbblmnD+GPg==}
     dev: false
@@ -726,23 +702,6 @@ packages:
       react-transition-group: 4.4.5(react-dom@18.2.0)(react@18.2.0)
     dev: false
 
-  /@mui/private-theming@5.13.7(@types/react@18.2.19)(react@18.2.0):
-    resolution: {integrity: sha512-qbSr+udcij5F9dKhGX7fEdx2drXchq7htLNr2Qg2Ma+WJ6q0ERlEqGSBiPiVDJkptcjeVL4DGmcf1wl5+vD4EA==}
-    engines: {node: '>=12.0.0'}
-    peerDependencies:
-      '@types/react': ^17.0.0 || ^18.0.0
-      react: ^17.0.0 || ^18.0.0
-    peerDependenciesMeta:
-      '@types/react':
-        optional: true
-    dependencies:
-      '@babel/runtime': 7.22.6
-      '@mui/utils': 5.14.3(react@18.2.0)
-      '@types/react': 18.2.19
-      prop-types: 15.8.1
-      react: registry.npmmirror.com/react@18.2.0
-    dev: false
-
   /@mui/private-theming@5.14.4(@types/react@18.2.19)(react@18.2.0):
     resolution: {integrity: sha512-ISXsHDiQ3z1XA4IuKn+iXDWvDjcz/UcQBiFZqtdoIsEBt8CB7wgdQf3LwcwqO81dl5ofg/vNQBEnXuKfZHrnYA==}
     engines: {node: '>=12.0.0'}
@@ -777,36 +736,6 @@ packages:
       '@emotion/cache': 11.11.0
       '@emotion/react': registry.npmmirror.com/@emotion/react@11.11.1(@types/react@18.2.19)(react@18.2.0)
       '@emotion/styled': registry.npmmirror.com/@emotion/styled@11.11.0(@emotion/react@11.11.1)(@types/react@18.2.19)(react@18.2.0)
-      csstype: 3.1.2
-      prop-types: 15.8.1
-      react: registry.npmmirror.com/react@18.2.0
-    dev: false
-
-  /@mui/system@5.14.3(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@types/react@18.2.19)(react@18.2.0):
-    resolution: {integrity: sha512-b+C+j9+75+/iIYSa+1S4eCMc9MDNrj9hzWfExJqS2GffuNocRagjBZFyjtMqsLWLxMxQIX8Cg6j0hAioiw+WfQ==}
-    engines: {node: '>=12.0.0'}
-    peerDependencies:
-      '@emotion/react': ^11.5.0
-      '@emotion/styled': ^11.3.0
-      '@types/react': ^17.0.0 || ^18.0.0
-      react: ^17.0.0 || ^18.0.0
-    peerDependenciesMeta:
-      '@emotion/react':
-        optional: true
-      '@emotion/styled':
-        optional: true
-      '@types/react':
-        optional: true
-    dependencies:
-      '@babel/runtime': 7.22.6
-      '@emotion/react': registry.npmmirror.com/@emotion/react@11.11.1(@types/react@18.2.19)(react@18.2.0)
-      '@emotion/styled': registry.npmmirror.com/@emotion/styled@11.11.0(@emotion/react@11.11.1)(@types/react@18.2.19)(react@18.2.0)
-      '@mui/private-theming': 5.13.7(@types/react@18.2.19)(react@18.2.0)
-      '@mui/styled-engine': 5.13.2(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(react@18.2.0)
-      '@mui/types': 7.2.4(@types/react@18.2.19)
-      '@mui/utils': 5.14.3(react@18.2.0)
-      '@types/react': 18.2.19
-      clsx: 2.0.0
       csstype: 3.1.2
       prop-types: 15.8.1
       react: registry.npmmirror.com/react@18.2.0
@@ -881,7 +810,7 @@ packages:
       react-is: 18.2.0
     dev: false
 
-  /@mui/x-date-pickers@6.11.0(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@mui/base@5.0.0-beta.9)(@mui/material@5.14.4)(@mui/system@5.14.3)(dayjs@1.11.9)(react-dom@18.2.0)(react@18.2.0):
+  /@mui/x-date-pickers@6.11.0(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@mui/base@5.0.0-beta.10)(@mui/material@5.14.4)(@mui/system@5.14.4)(dayjs@1.11.9)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-yVGfpH3scUauLaHWvzckD0xswboC48YAaJ4568YTkKozXFSPPkvK7VGSQ+qo1u8K2UjYh1iZoff3k0EoDDPnww==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
@@ -922,9 +851,9 @@ packages:
       '@babel/runtime': 7.22.6
       '@emotion/react': registry.npmmirror.com/@emotion/react@11.11.1(@types/react@18.2.19)(react@18.2.0)
       '@emotion/styled': registry.npmmirror.com/@emotion/styled@11.11.0(@emotion/react@11.11.1)(@types/react@18.2.19)(react@18.2.0)
-      '@mui/base': 5.0.0-beta.9(@types/react@18.2.19)(react-dom@18.2.0)(react@18.2.0)
+      '@mui/base': 5.0.0-beta.10(@types/react@18.2.19)(react-dom@18.2.0)(react@18.2.0)
       '@mui/material': 5.14.4(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@types/react@18.2.19)(react-dom@18.2.0)(react@18.2.0)
-      '@mui/system': 5.14.3(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@types/react@18.2.19)(react@18.2.0)
+      '@mui/system': 5.14.4(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@types/react@18.2.19)(react@18.2.0)
       '@mui/utils': 5.14.3(react@18.2.0)
       '@types/react-transition-group': 4.4.6
       clsx: 1.2.1
@@ -1704,6 +1633,7 @@ packages:
 
   /brace-expansion@1.1.11:
     resolution: {integrity: sha512-iCuPHDFgrHX7H2vEI/5xpz07zSHB00TpugqhmYtVmMO6518mCuRMoOYFldEBl0g187ufozdaHgWKcYFb61qGiA==}
+    requiresBuild: true
     dependencies:
       balanced-match: 1.0.2
       concat-map: 0.0.1
@@ -1860,6 +1790,7 @@ packages:
 
   /chromium-pickle-js@0.2.0:
     resolution: {integrity: sha512-1R5Fho+jBq0DDydt+/vHWj5KJNJCKdARKOCwZUen84I5BreWoLqRLANH1U87eJy1tiASPtMnGqJJq0ZsLoRPOw==}
+    requiresBuild: true
     dev: true
 
   /clean-css@5.3.2:
@@ -1973,6 +1904,7 @@ packages:
   /commander@5.1.0:
     resolution: {integrity: sha512-P0CysNDQ7rtVw4QIQtm+MRxV66vKFSvlsQvGYXZWR3qFU0jlMKHZZZgw8e+8DSah4UDKMqnknRDQz+xuQXQ/Zg==}
     engines: {node: '>= 6'}
+    requiresBuild: true
     dev: true
 
   /commander@8.3.0:
@@ -2009,6 +1941,7 @@ packages:
 
   /concat-map@0.0.1:
     resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}
+    requiresBuild: true
     dev: true
 
   /connect-history-api-fallback@2.0.0:
@@ -2106,7 +2039,6 @@ packages:
         optional: true
     dependencies:
       ms: 2.0.0
-    dev: true
 
   /debug@3.2.7:
     resolution: {integrity: sha512-CFjzYYAi4ThfiQvizrFQevTTXHtnCqWfe7x1AhgEscTz6ZbLbfoLRLPugTQyBth6f8ZERVUSyWHFD/7Wu4t1XQ==}
@@ -2306,6 +2238,14 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
+
+  /electron-squirrel-startup@1.0.0:
+    resolution: {integrity: sha512-Oce8mvgGdFmwr+DsAcXBmFK8jFfN6yaFAP9IvyhTfupM3nFkBku/7VS/mdtJteWumImkC6P+BKGsxScoDDkv9Q==}
+    dependencies:
+      debug: 2.6.9
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
 
   /electron-to-chromium@1.4.477:
     resolution: {integrity: sha512-shUVy6Eawp33dFBFIoYbIwLHrX0IZ857AlH9ug2o4rvbWmpaCUdBpQ5Zw39HRrfzAFm4APJE9V+E2A/WB0YqJw==}
@@ -2782,6 +2722,7 @@ packages:
 
   /fs.realpath@1.0.0:
     resolution: {integrity: sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==}
+    requiresBuild: true
     dev: true
 
   /fsevents@2.3.2:
@@ -3231,6 +3172,7 @@ packages:
 
   /inflight@1.0.6:
     resolution: {integrity: sha512-k92I/b08q4wvFscXCLvqfsHCrjrF7yiXsQuIVvVE7N82W3+aqpzuUdBbfhWcy/FZR3/4IgflMgKLOsvPDrGCJA==}
+    requiresBuild: true
     dependencies:
       once: 1.4.0
       wrappy: 1.0.2
@@ -3394,6 +3336,22 @@ packages:
       merge-stream: 2.0.0
       supports-color: 8.1.1
     dev: true
+
+  /jotai@2.3.1(@types/react@18.2.19)(react@18.2.0):
+    resolution: {integrity: sha512-pXhx8/MeRUAHbzayerEUf9NHvP+Ba3q9WAvIMjaSwwuSCKEFhb8UW4XuZPC+Bv4u2ufvlyrxIZ+vy5UJ3f8JsQ==}
+    engines: {node: '>=12.20.0'}
+    peerDependencies:
+      '@types/react': '>=17.0.0'
+      react: '>=17.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      react:
+        optional: true
+    dependencies:
+      '@types/react': 18.2.19
+      react: registry.npmmirror.com/react@18.2.0
+    dev: false
 
   /js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
@@ -3818,7 +3776,6 @@ packages:
 
   /ms@2.0.0:
     resolution: {integrity: sha512-Tpp60P6IUJDTuOq/5Z8cdskzJujfwqfOTkrwIwj7IRISpnkJnT6SyJ4PCPnGMoFjC9ddhal5KVIYtAt97ix05A==}
-    dev: true
 
   /ms@2.1.2:
     resolution: {integrity: sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==}
@@ -4181,6 +4138,7 @@ packages:
   /path-is-absolute@1.0.1:
     resolution: {integrity: sha512-AVbw3UJ2e9bq64vSaS9Am0fje1Pa8pbGqTTsmXfaIiMpnr5DlDhfJOuLj9Sf95ZPVDAUerDfEk88MPmPe7UCQg==}
     engines: {node: '>=0.10.0'}
+    requiresBuild: true
     dev: true
 
   /path-key@2.0.1:
@@ -5431,6 +5389,7 @@ packages:
 
   /wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
+    requiresBuild: true
     dev: true
 
   /ws@7.5.9:
@@ -5774,7 +5733,7 @@ packages:
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     dependencies:
       ajv: registry.npmmirror.com/ajv@6.12.6
-      debug: registry.npmmirror.com/debug@4.3.4
+      debug: 4.3.4
       espree: registry.npmmirror.com/espree@9.6.1
       globals: registry.npmmirror.com/globals@13.20.0
       ignore: registry.npmmirror.com/ignore@5.2.4
@@ -5857,7 +5816,7 @@ packages:
     engines: {node: '>=10.10.0'}
     dependencies:
       '@humanwhocodes/object-schema': registry.npmmirror.com/@humanwhocodes/object-schema@1.2.1
-      debug: registry.npmmirror.com/debug@4.3.4
+      debug: 4.3.4
       minimatch: registry.npmmirror.com/minimatch@3.1.2
     transitivePeerDependencies:
       - supports-color
@@ -6053,12 +6012,6 @@ packages:
     resolution: {integrity: sha512-Hr5Jfhc9eYOQNPYO5WLDq/n4jqijdHNlDXjuAQkkt+mWdQR+XJToOHrsD4cPaMXpn6KO7y2+wM8AZEs8VpBLVA==, registry: https://registry.npmjs.org/, tarball: https://registry.npmmirror.com/@types/json-schema/-/json-schema-7.0.12.tgz}
     name: '@types/json-schema'
     version: 7.0.12
-    dev: true
-
-  registry.npmmirror.com/@types/lodash@4.14.196:
-    resolution: {integrity: sha512-22y3o88f4a94mKljsZcanlNWPzO0uBsBdzLAngf2tp533LzZcQzb6+eZPJ+vCTt+bqF2XnvT9gejTLsAcJAJyQ==, registry: https://registry.npmjs.org/, tarball: https://registry.npmmirror.com/@types/lodash/-/lodash-4.14.196.tgz}
-    name: '@types/lodash'
-    version: 4.14.196
     dev: true
 
   registry.npmmirror.com/@types/node@20.4.5:
@@ -6782,7 +6735,7 @@ packages:
       supports-color:
         optional: true
     dependencies:
-      ms: registry.npmmirror.com/ms@2.1.2
+      ms: 2.1.2
     dev: true
 
   registry.npmmirror.com/deep-is@0.1.4:
@@ -7918,12 +7871,6 @@ packages:
     version: 4.6.2
     dev: true
 
-  registry.npmmirror.com/lodash@4.17.21:
-    resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==, registry: https://registry.npmjs.org/, tarball: https://registry.npmmirror.com/lodash/-/lodash-4.17.21.tgz}
-    name: lodash
-    version: 4.17.21
-    dev: false
-
   registry.npmmirror.com/loose-envify@1.4.0:
     resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==, registry: https://registry.npmjs.org/, tarball: https://registry.npmmirror.com/loose-envify/-/loose-envify-1.4.0.tgz}
     name: loose-envify
@@ -8016,12 +7963,6 @@ packages:
     version: 3.1.2
     dependencies:
       brace-expansion: registry.npmmirror.com/brace-expansion@1.1.11
-    dev: true
-
-  registry.npmmirror.com/ms@2.1.2:
-    resolution: {integrity: sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==, registry: https://registry.npmjs.org/, tarball: https://registry.npmmirror.com/ms/-/ms-2.1.2.tgz}
-    name: ms
-    version: 2.1.2
     dev: true
 
   registry.npmmirror.com/mz@2.7.0:
