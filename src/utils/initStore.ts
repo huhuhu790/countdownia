@@ -22,16 +22,20 @@ export interface StoreType {
 
 export type CustomStore = Store<StoreType>
 
-export function getStore(
-    countdownWindowHeight: number
-) {
+export function getStore({
+    countdownWindowInitialWidth,
+    countdownWindowInitialHeight
+}:{
+    countdownWindowInitialWidth: number
+    countdownWindowInitialHeight: number
+}) {
     return new Store<StoreType>({
         schema: {
             size: {
                 type: "object",
                 default: {
-                    width: 1200,
-                    height: countdownWindowHeight
+                    width: countdownWindowInitialWidth,
+                    height: countdownWindowInitialHeight
                 }
             },
             countdownDate: {

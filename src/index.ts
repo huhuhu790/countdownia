@@ -4,11 +4,9 @@ import {
   Menu,
   nativeImage,
   nativeTheme,
-  Tray,
-  session
+  Tray
 } from "electron"
 import path from "node:path"
-import os from "node:os"
 import { Dialogs } from "./utils/dialogs"
 import { CustomStore, getStore, setStoreWatcher } from "./utils/initStore"
 import {
@@ -31,11 +29,15 @@ declare const LOADING_WEBPACK_ENTRY: string
 
 const WM_INITMENU = 0x0116
 
-const configWindowWidth = 1400
-const configWindowHeight = 750
+const configWindowInitialWidth = 1400
+const configWindowInitialHeight = 800
+const configWindowMinWidth = 900
+const configWindowMinHeight = 600
 
-const countdownWindowWidth = 80
-const countdownWindowHeight = 80
+const countdownWindowInitialWidth = 1000
+const countdownWindowInitialHeight = 80
+const countdownWindowMinWidth = 80
+const countdownWindowMinHeight = 80
 
 const dragBarWidth = 24
 
@@ -76,7 +78,10 @@ function exitApp() {
 }
 
 function setStore() {
-  store = getStore(countdownWindowHeight)
+  store = getStore({
+    countdownWindowInitialWidth,
+    countdownWindowInitialHeight
+  })
 }
 
 function setMenu() {
@@ -155,7 +160,7 @@ function setTray() {
   tray = new Tray(nativeImage.createFromPath(path.resolve(__dirname, "public", "favicon.ico")))
   tray.setContextMenu(contextMenu)
   tray
-    .addListener("click", () => {
+    .addListener("double-click", () => {
       showWindow(countdownWindow)
     })
     .setToolTip("Countdownia")
@@ -168,8 +173,8 @@ function setCountdownWindow() {
     icon: "public/favicon.ico",
     height: size.height,
     width: size.width,
-    minHeight: countdownWindowHeight,
-    minWidth: countdownWindowWidth,
+    minHeight: countdownWindowMinHeight,
+    minWidth: countdownWindowMinWidth,
     x: position.x,
     y: position.y,
     webPreferences: {
@@ -234,10 +239,10 @@ function setCountdownWindow() {
 function setConfigWindow() {
   configWindow = new BrowserWindow({
     icon: "public/favicon.ico",
-    height: configWindowHeight,
-    width: configWindowWidth,
-    minHeight: configWindowHeight,
-    minWidth: configWindowWidth,
+    height: configWindowInitialHeight,
+    width: configWindowInitialWidth,
+    minHeight: configWindowMinHeight,
+    minWidth: configWindowMinWidth,
     fullscreenable: false,
     webPreferences: {
       preload: CONFIG_PRELOAD_WEBPACK_ENTRY,
@@ -303,8 +308,8 @@ const createWindow = () => {
   setCountdownWindowEvent({
     store,
     countdownWindow,
-    countdownWindowWidth,
-    countdownWindowHeight,
+    minWidth: countdownWindowMinWidth,
+    minHeight: countdownWindowMinHeight,
     dragBarWidth
   })
   setDialogWindowEvent({

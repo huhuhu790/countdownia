@@ -7,6 +7,7 @@ import {
     ListItemText,
     Toolbar,
     Tooltip,
+    useMediaQuery,
     useTheme
 } from "@mui/material"
 import EventNoteIcon from "@mui/icons-material/EventNote"
@@ -18,6 +19,7 @@ import MenuIcon from "@mui/icons-material/Menu"
 import { useAtom } from "jotai"
 import { openDrawer } from "./jotai/atoms"
 
+const minScreenSizeAllowOpen = 1400
 const openWidth = 280
 const shrinkWidth = 88
 const backgroundColor = "#254B85"
@@ -48,24 +50,31 @@ const list = [
     }
 ]
 
-function CustomDrawer() {
+function CustomDrawer({
+    matches,
+    openStatus,
+    width,
+    changeDrawerOpen
+}: {
+    matches: boolean
+    openStatus: boolean
+    width: number
+    changeDrawerOpen: () => void
+}) {
     const nav = useNavigate()
     const { transitions } = useTheme()
-    const [open, setOpen] = useAtom(openDrawer)
-    function changeDrawerOpen() {
-        setOpen(!open)
-    }
     const transition = useMemo(() => transitions.create("width", {
         easing: transitions.easing.sharp,
         duration: transitions.duration.enteringScreen,
     }), [transitions])
+
     return (
         <Drawer
             variant="permanent"
             sx={{
                 flexShrink: 0,
                 height: "100%",
-                width: open ? openWidth : shrinkWidth,
+                width,
                 transition,
                 "& .MuiDrawer-paper": {
                     position: "initial",
@@ -75,7 +84,7 @@ function CustomDrawer() {
         >
             <Toolbar
                 sx={{
-                    display: "flex",
+                    display: matches ? "flex" : "none",
                     justifyContent: "flex-end"
                 }}
             >
@@ -90,7 +99,7 @@ function CustomDrawer() {
                             <ListItemButton
                                 sx={{
                                     minHeight: 48,
-                                    justifyContent: open ? "initial" : "center",
+                                    justifyContent: openStatus ? "initial" : "center",
                                     px: 2.5,
                                 }}
                                 onClick={() => nav(i.route)}
@@ -98,17 +107,17 @@ function CustomDrawer() {
                                 <ListItemIcon
                                     sx={{
                                         minWidth: 0,
-                                        mr: open ? 3 : "auto",
+                                        mr: openStatus ? 3 : "auto",
                                         justifyContent: "center",
                                     }}
                                 >
-                                    <Tooltip title={i.name} placement="right" disableHoverListener={open}>
+                                    <Tooltip title={i.name} placement="right" disableHoverListener={openStatus}>
                                         <Avatar>
                                             {i.icon}
                                         </Avatar>
                                     </Tooltip>
                                 </ListItemIcon>
-                                <ListItemText primary={i.name} sx={{ opacity: open ? 1 : 0 }} />
+                                <ListItemText primary={i.name} sx={{ display: openStatus ? "" : "none" }} />
                             </ListItemButton>
                         </ListItem>
                     ))
@@ -119,6 +128,17 @@ function CustomDrawer() {
 }
 
 export default function HomePage() {
+    const matches = useMediaQuery(`@media (min-width:${minScreenSizeAllowOpen}px)`)
+    const [open, setOpen] = useAtom(openDrawer)
+    const openStatus = useMemo(() => {
+        return open && matches
+    }, [open, matches])
+    const width = useMemo(() => {
+        return openStatus ? openWidth : shrinkWidth
+    }, [openStatus])
+    function changeDrawerOpen() {
+        setOpen(!open)
+    }
     return (
         <>
             <DragBar />
@@ -140,8 +160,13 @@ export default function HomePage() {
                     }
                 }}
             >
-                <CustomDrawer />
-                <Box sx={{ flex: 1 }} >
+                <CustomDrawer
+                    changeDrawerOpen={changeDrawerOpen}
+                    matches={matches}
+                    width={width}
+                    openStatus={openStatus}
+                />
+                <Box sx={{ width: `calc( 100% - ${width}px)` }}>
                     <Outlet />
                 </Box>
             </Box >

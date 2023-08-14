@@ -44,14 +44,14 @@ export function setAppEvent({
 export function setCountdownWindowEvent({
     store,
     countdownWindow,
-    countdownWindowWidth,
-    countdownWindowHeight,
+    minWidth,
+    minHeight,
     dragBarWidth
 }: {
     store: CustomStore
     countdownWindow: Electron.BrowserWindow
-    countdownWindowWidth: number
-    countdownWindowHeight: number
+    minWidth: number
+    minHeight: number
     dragBarWidth: number
 }) {
     ipcMain
@@ -61,9 +61,9 @@ export function setCountdownWindowEvent({
         .on("setResizable", (event, canResize: boolean) => {
             countdownWindow.resizable = canResize
             if (canResize)
-                countdownWindow.setMinimumSize(countdownWindowWidth, countdownWindowHeight + dragBarWidth)
+                countdownWindow.setMinimumSize(minWidth, minHeight + dragBarWidth)
             else
-                countdownWindow.setMinimumSize(countdownWindowWidth, countdownWindowHeight)
+                countdownWindow.setMinimumSize(minWidth, minHeight)
         })
         .on("setAlwaysOnTop", (event, status: boolean) => {
             countdownWindow.setAlwaysOnTop(status)

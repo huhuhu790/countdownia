@@ -32,6 +32,7 @@ import { openDrawer } from "../jotai/atoms"
 const options = ["Month View", "Day View"]
 export interface CalendarAreaRef {
     dayGridMonth: (date?: Date) => void
+    onEventAdd: () => void
 }
 
 const background = {
@@ -175,7 +176,6 @@ function SplitButton({
 
 interface Props {
     fullCalendarRef: React.MutableRefObject<FullCalendar>
-    onEventAdd: () => void
 }
 interface Ref {
     dayGridMonth: (date?: Date) => void
@@ -184,7 +184,6 @@ interface Ref {
 
 const CalendarToolBar = forwardRef<Ref, Props>(function CalendarToolBar({
     fullCalendarRef,
-    onEventAdd
 }, ref) {
     const [selectedIndex, setSelectedIndex] = useState(0)
     const [date, setDate] = useState(new Date())
@@ -336,12 +335,6 @@ const CalendarToolBar = forwardRef<Ref, Props>(function CalendarToolBar({
                 selectedIndex={selectedIndex}
                 setSelectedIndex={setSelectedIndex}
             />
-
-            <Divider orientation="vertical" sx={{ mx: 4, height: 32 }} light />
-
-            <Button onClick={onEventAdd} variant="contained" color="secondary">
-                Add Event
-            </Button>
         </Box >
     )
 })
@@ -379,7 +372,8 @@ export default forwardRef<CalendarAreaRef, {
     useImperativeHandle(
         ref,
         () => ({
-            dayGridMonth: CalendarToolBarRef.current.dayGridMonth
+            dayGridMonth: CalendarToolBarRef.current.dayGridMonth,
+            onEventAdd
         }),
         []
     )
@@ -396,9 +390,6 @@ export default forwardRef<CalendarAreaRef, {
     return (
         <Box
             sx={{
-                px: 2,
-                pt: 4,
-                pb: 8,
                 minHeight: "100%",
                 display: "flex"
             }}
@@ -418,7 +409,6 @@ export default forwardRef<CalendarAreaRef, {
             >
                 <CalendarToolBar
                     ref={CalendarToolBarRef}
-                    onEventAdd={onEventAdd}
                     fullCalendarRef={fullCalendarRef}
                 />
                 <FullCalendar

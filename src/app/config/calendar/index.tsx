@@ -1,17 +1,48 @@
 import {
-    Box, List, ListItem, ListItemButton, ListItemText, Typography
+    Box,
+    List, ListItem,
+    ListItemButton, ListItemText,
+    SpeedDial,
+    SpeedDialAction,
+    Typography,
+    useMediaQuery
 } from "@mui/material"
 import CalendarArea, { CalendarAreaRef } from "./CalendarArea"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import dayjs from "dayjs"
-import ScrollTop from "@/components/ScrollTop"
+import SpeedDialIcon from "@mui/material/SpeedDialIcon"
+import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined"
+import KeyboardArrowUpOutlinedIcon from "@mui/icons-material/KeyboardArrowUpOutlined"
 
 const sideWidth = 280
+const miniSideWidth = 200
+const minScreenSizeShowSide = 1200
 
 export default function CalendarPage() {
     const calendarAreaRef = useRef<CalendarAreaRef>()
-    const parentRef = useRef<HTMLDivElement>()
+    const anchorItem = useRef<HTMLDivElement>()
     const [countdownDate, setCountdownDate] = useState(window.ipcRenderer.getStore<DateList>("countdownDate"))
+    const matches = useMediaQuery(`@media (min-width:${minScreenSizeShowSide}px)`)
+
+    const actions = useMemo(() => [
+        {
+            icon: <AddCircleOutlineOutlinedIcon />,
+            name: "Add",
+            event() {
+                calendarAreaRef.current.onEventAdd()
+            }
+        },
+        {
+            icon: <KeyboardArrowUpOutlinedIcon />,
+            name: "Back to top",
+            event() {
+                anchorItem.current.scrollIntoView({
+                    block: "center",
+                    behavior: "smooth"
+                })
+            }
+        }
+    ], [])
 
     useEffect(() => {
         function countdownDateHasChanged(_: unknown, data: DateList) {
@@ -33,11 +64,12 @@ export default function CalendarPage() {
                 display: "flex",
                 height: "100%",
                 width: "100%",
+                position: "relative",
             }}
         >
             <Box
                 sx={{
-                    width: sideWidth + "px",
+                    width: (matches ? sideWidth : miniSideWidth) + "px",
                     height: "100%",
                     overflow: "auto"
                 }}
@@ -50,24 +82,36 @@ export default function CalendarPage() {
             <Box
                 sx={{
                     flex: 1,
-                    position: "relative"
+                    overflow: "auto",
+                    p: 1,
+                    pb: 12,
                 }}
             >
-                <Box
-                    ref={parentRef}
-                    sx={{
-                        width: "100%",
-                        height: "100%",
-                        overflow: "auto"
-                    }}
-                >
-                    <div id="scroll-into"></div>
-                    <CalendarArea
-                        ref={calendarAreaRef}
-                        countdownDate={countdownDate} />
-                </Box>
-                <ScrollTop bottom={12} right={24} el={parentRef} position="absolute" />
+                <Box ref={anchorItem} />
+                <CalendarArea
+                    ref={calendarAreaRef}
+                    countdownDate={countdownDate} />
             </Box >
+            <SpeedDial
+                sx={{
+                    position: "absolute",
+                    bottom: 24,
+                    right: 24,
+                }}
+                ariaLabel="SpeedDial"
+                hidden={false}
+                icon={<SpeedDialIcon />}
+                direction="left"
+            >
+                {actions.map((action) => (
+                    <SpeedDialAction
+                        key={action.name}
+                        icon={action.icon}
+                        tooltipTitle={action.name}
+                        onClick={action.event}
+                    />
+                ))}
+            </SpeedDial>
         </Box>
     )
 }
