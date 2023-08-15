@@ -4,8 +4,7 @@ import {
     ListItemButton, ListItemText,
     SpeedDial,
     SpeedDialAction,
-    Typography,
-    useMediaQuery
+    Typography
 } from "@mui/material"
 import CalendarArea, { CalendarAreaRef } from "./CalendarArea"
 import { useEffect, useMemo, useRef, useState } from "react"
@@ -14,15 +13,10 @@ import SpeedDialIcon from "@mui/material/SpeedDialIcon"
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined"
 import KeyboardArrowUpOutlinedIcon from "@mui/icons-material/KeyboardArrowUpOutlined"
 
-const sideWidth = 280
-const miniSideWidth = 200
-const minScreenSizeShowSide = 1200
-
 export default function CalendarPage() {
     const calendarAreaRef = useRef<CalendarAreaRef>()
     const anchorItem = useRef<HTMLDivElement>()
     const [countdownDate, setCountdownDate] = useState(window.ipcRenderer.getStore<DateList>("countdownDate"))
-    const matches = useMediaQuery(`@media (min-width:${minScreenSizeShowSide}px)`)
 
     const actions = useMemo(() => [
         {
@@ -69,7 +63,7 @@ export default function CalendarPage() {
         >
             <Box
                 sx={{
-                    width: (matches ? sideWidth : miniSideWidth) + "px",
+                    flex: 3,
                     height: "100%",
                     overflow: "auto"
                 }}
@@ -81,7 +75,7 @@ export default function CalendarPage() {
             </Box>
             <Box
                 sx={{
-                    flex: 1,
+                    flex: 7,
                     overflow: "auto",
                     p: 1,
                     pb: 12,

@@ -1,10 +1,11 @@
 import {
-    Box, Paper
+    Box,
+    Paper
 } from "@mui/material"
 
 const dragBar = 24
 
-function DragBar({ children }: { children?: React.ReactNode }) {
+function DragBar() {
     return (
         <Box
             className="draggable"
@@ -15,10 +16,12 @@ function DragBar({ children }: { children?: React.ReactNode }) {
                 top: 0,
                 width: "100%",
                 height: dragBar + "px",
-                backdropFilter: "brightness(0.8)"
+                backdropFilter: "brightness(0.8)",
+                display: "flex",
+                alignItems: "center"
             }}
         >
-            {children}
+            <Box sx={{ flexGrow: 1 }}></Box>
         </Box>
     )
 }

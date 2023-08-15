@@ -62,7 +62,7 @@ function CustomDrawer({
     changeDrawerOpen: () => void
 }) {
     const nav = useNavigate()
-    const { transitions } = useTheme()
+    const { transitions, palette } = useTheme()
     const transition = useMemo(() => transitions.create("width", {
         easing: transitions.easing.sharp,
         duration: transitions.duration.enteringScreen,
@@ -78,7 +78,8 @@ function CustomDrawer({
                 transition,
                 "& .MuiDrawer-paper": {
                     position: "initial",
-                    border: "none"
+                    border: "none",
+                    bgcolor: palette.background.default
                 }
             }}
         >
@@ -129,6 +130,7 @@ function CustomDrawer({
 
 export default function HomePage() {
     const matches = useMediaQuery(`@media (min-width:${minScreenSizeAllowOpen}px)`)
+    const { palette } = useTheme()
     const [open, setOpen] = useAtom(openDrawer)
     const openStatus = useMemo(() => {
         return open && matches
@@ -155,7 +157,7 @@ export default function HomePage() {
                         borderRadius: "20px"
                     },
                     "*::-webkit-scrollbar-thumb": {
-                        backgroundColor,
+                        bgcolor: `primary.${palette.mode}`,
                         borderRadius: "20px"
                     }
                 }}

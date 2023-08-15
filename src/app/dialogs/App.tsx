@@ -1,7 +1,8 @@
-import { CssBaseline, ThemeProvider, createTheme, useMediaQuery } from "@mui/material"
+import { CssBaseline, ThemeProvider, useMediaQuery } from "@mui/material"
 import { useMemo } from "react"
 import Layout from "./layout"
 import { getNode } from "./getNode"
+import { themes } from "@/themes/themeOptions"
 
 const params = new URLSearchParams(location.search)
 const Item = getNode(params.get("type"))
@@ -12,11 +13,7 @@ export default function App() {
     const theme = useMemo(
         () => {
             const mode = prefersDarkMode ? "dark" : "light"
-            return createTheme({
-                palette: {
-                    mode,
-                }
-            })
+            return themes[mode]
         },
         [prefersDarkMode],
     )

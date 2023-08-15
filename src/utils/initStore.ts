@@ -6,6 +6,10 @@ export interface StoreType {
         width: number
         height: number
     }
+    sizeConfig: {
+        width: number
+        height: number
+    }
     countdownDate: DateList
     position: {
         x: number
@@ -24,10 +28,14 @@ export type CustomStore = Store<StoreType>
 
 export function getStore({
     countdownWindowInitialWidth,
-    countdownWindowInitialHeight
-}:{
+    countdownWindowInitialHeight,
+    configWindowInitialWidth,
+    configWindowInitialHeight
+}: {
     countdownWindowInitialWidth: number
     countdownWindowInitialHeight: number
+    configWindowInitialWidth: number
+    configWindowInitialHeight: number
 }) {
     return new Store<StoreType>({
         schema: {
@@ -36,6 +44,13 @@ export function getStore({
                 default: {
                     width: countdownWindowInitialWidth,
                     height: countdownWindowInitialHeight
+                }
+            },
+            sizeConfig: {
+                type: "object",
+                default: {
+                    width: configWindowInitialWidth,
+                    height: configWindowInitialHeight
                 }
             },
             countdownDate: {

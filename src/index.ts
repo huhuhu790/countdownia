@@ -31,7 +31,7 @@ const WM_INITMENU = 0x0116
 
 const configWindowInitialWidth = 1400
 const configWindowInitialHeight = 800
-const configWindowMinWidth = 900
+const configWindowMinWidth = 950
 const configWindowMinHeight = 600
 
 const countdownWindowInitialWidth = 1000
@@ -80,7 +80,9 @@ function exitApp() {
 function setStore() {
   store = getStore({
     countdownWindowInitialWidth,
-    countdownWindowInitialHeight
+    countdownWindowInitialHeight,
+    configWindowInitialWidth,
+    configWindowInitialHeight
   })
 }
 
@@ -158,12 +160,15 @@ function setMenu() {
 function setTray() {
   // 设置托盘图标
   tray = new Tray(nativeImage.createFromPath(path.resolve(__dirname, "public", "favicon.ico")))
-  tray.setContextMenu(contextMenu)
   tray
-    .addListener("double-click", () => {
+    .on("click", () => {
       showWindow(countdownWindow)
     })
+    .on("double-click", () => {
+      showWindow(configWindow)
+    })
     .setToolTip("Countdownia")
+  tray.setContextMenu(contextMenu)
 }
 function setCountdownWindow() {
   const size = store.get("size")
@@ -237,10 +242,11 @@ function setCountdownWindow() {
 }
 
 function setConfigWindow() {
+  const size = store.get("sizeConfig")
   configWindow = new BrowserWindow({
     icon: "public/favicon.ico",
-    height: configWindowInitialHeight,
-    width: configWindowInitialWidth,
+    height: size.height,
+    width: size.width,
     minHeight: configWindowMinHeight,
     minWidth: configWindowMinWidth,
     fullscreenable: false,
@@ -259,6 +265,13 @@ function setConfigWindow() {
     })
     .addListener("system-context-menu", (e) => {
       e.preventDefault()
+    })
+    .addListener("resized", () => {
+      const bounds = configWindow.getBounds()
+      store.set("sizeConfig", {
+        width: bounds.width,
+        height: bounds.height
+      })
     })
     .hookWindowMessage(WM_INITMENU, () => {
       configWindow.setEnabled(false)

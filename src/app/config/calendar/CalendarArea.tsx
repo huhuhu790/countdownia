@@ -9,7 +9,6 @@ import {
     ClickAwayListener,
     MenuList,
     MenuItem,
-    Divider,
     Button
 } from "@mui/material"
 import FullCalendar from "@fullcalendar/react"

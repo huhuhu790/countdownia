@@ -1,7 +1,8 @@
-import { CssBaseline, ThemeProvider, createTheme, useMediaQuery } from "@mui/material"
+import { CssBaseline, ThemeProvider, useMediaQuery } from "@mui/material"
 import { SnackbarProvider } from "notistack"
 import { useMemo } from "react"
 import { RouterProvider, } from "react-router-dom"
+import { themes } from "@/themes/themeOptions"
 import router from "./router"
 
 export default function App() {
@@ -10,11 +11,7 @@ export default function App() {
     const theme = useMemo(
         () => {
             const mode = prefersDarkMode ? "dark" : "light"
-            return createTheme({
-                palette: {
-                    mode,
-                }
-            })
+            return themes[mode]
         },
         [prefersDarkMode],
     )
