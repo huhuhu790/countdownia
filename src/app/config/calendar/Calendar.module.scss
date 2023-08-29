@@ -1,0 +1,56 @@
+.calendar {}
+
+.past {}
+
+.prevMonth {
+    color: rgb(107 114 128);
+    padding: 1px;
+    height: 28px;
+}
+
+.nextMonth {
+    color: rgb(107 114 128);
+    padding: 1px;
+    height: 28px;
+}
+
+.currentMonth {}
+
+.today {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 600;
+    color: white;
+    background-color: rgb(79 70 229);
+    border-radius: 50%;
+    height: 28px;
+    width: 28px;
+    padding: 1px;
+}
+
+.title {}
+
+.longEvent {}
+
+.allDayEvent {}
+
+@media (prefers-color-scheme: dark) {
+    .calendar {}
+
+    .past {}
+
+    .prevMonth {}
+
+    .nextMonth {}
+
+    .currentMonth {}
+
+    .today {}
+
+    .title {}
+
+    .longEvent {}
+
+    .allDayEvent {}
+}

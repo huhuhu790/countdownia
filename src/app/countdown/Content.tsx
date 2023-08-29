@@ -17,7 +17,7 @@ export interface TimeGroup {
 }
 
 
-export interface TimeItem extends DateItem {
+export interface TimeItem extends EventItem {
     sign: boolean
     timeGroup: TimeGroup
     endTimeGroup?: TimeGroup

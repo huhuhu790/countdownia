@@ -28,7 +28,7 @@ function getTimeGroup(remain: number): TimeGroup {
 }
 
 export default function Home() {
-    const [countdownDate, setCountdownDate] = useState(window.ipcRenderer.getStore<DateList>("countdownDate"))
+    const [countdownDate, setCountdownDate] = useState(window.ipcRenderer.getStore<EventList>("countdownDate"))
     const box = useRef<HTMLDivElement>(null)
     const isUnlockRef = useRef(false)
     const contentRef = useRef<ContentRef>()
@@ -78,7 +78,7 @@ export default function Home() {
     }, [countdownDate])
 
     useEffect(() => {
-        function countdownDateHasChanged(_: unknown, data: DateList) {
+        function countdownDateHasChanged(_: unknown, data: EventList) {
             setCountdownDate(data)
         }
         window.ipcRenderer.addListener("hide", handleBlur)

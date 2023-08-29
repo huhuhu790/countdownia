@@ -119,7 +119,7 @@ export function setStoreEvent({
         .on("getStore", (event, name: string) => {
             event.returnValue = store.get(name)
         })
-        .on("setCountdownDate", (event, dateItem: DateItem) => {
+        .on("setCountdownDate", (event, dateItem: EventItem) => {
             const countdownDate = store.get("countdownDate")
             if (dateItem.id) {
                 const index = countdownDate.findIndex(i => i.id === dateItem.id)

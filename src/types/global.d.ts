@@ -12,13 +12,13 @@ declare global {
         ipcRenderer: IpcRendererHandlers
     }
 
-    interface DateItem {
+    interface EventItem {
         id: string
         date: number
+        endDate?: number
         title: string
         line?: string
-        endDate?: number
         description?: string
     }
-    type DateList = DateItem[]
+    type EventList = EventItem[]
 }

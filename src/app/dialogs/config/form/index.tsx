@@ -6,7 +6,6 @@ import {
     Typography
 } from "@mui/material"
 import { useEffect, useRef, useState } from "react"
-import { EventInput } from "@fullcalendar/core"
 import { DesktopDateTimePicker } from "@mui/x-date-pickers"
 import dayjs, { Dayjs } from "dayjs"
 import { Controller, useForm } from "react-hook-form"
@@ -15,7 +14,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider"
 import { DIALOG_NAMES } from "@/utils/dialogNames"
 
 export interface FormDialogRef {
-    openDialog: (isFormTypeAdd: boolean, currentEvent?: EventInput) => void
+    openDialog: (isFormTypeAdd: boolean, currentEvent?: EventItem) => void
 }
 interface FormType {
     title: string
@@ -38,15 +37,14 @@ export default function FormDialog() {
     })
 
     useEffect(() => {
-        function handleClickOpen(_: unknown, { info }: { info?: EventInput }) {
+        function handleClickOpen(_: unknown, { info = {} }: { info?: Partial<EventItem> }) {
             setFormTypeAdd(!info)
-            const extendedProps: Partial<DateItem> = info?.extendedProps ?? {}
-            id.current = extendedProps.id
-            setValue("title", extendedProps.title ?? "")
-            setValue("line", extendedProps.line ?? "")
-            setValue("description", extendedProps.description ?? "")
-            setValue("startDate", extendedProps.date ? dayjs(extendedProps.date) : null)
-            setValue("endDate", extendedProps.endDate ? dayjs(extendedProps.endDate) : null)
+            id.current = info.id
+            setValue("title", info.title ?? "")
+            setValue("line", info.line ?? "")
+            setValue("description", info.description ?? "")
+            setValue("startDate", info.date ? dayjs(info.date) : null)
+            setValue("endDate", info.endDate ? dayjs(info.endDate) : null)
         }
         window.ipcRenderer.addListener("open-dialog-extraInfo", handleClickOpen)
         return () => {
@@ -158,7 +156,7 @@ export default function FormDialog() {
                                 label="description"
                                 type="text"
                                 multiline
-                                rows={4}
+                                rows={12}
                                 fullWidth
                                 error={!!fieldState.error}
                                 helperText={fieldState.error?.message}

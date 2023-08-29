@@ -10,7 +10,7 @@ export interface StoreType {
         width: number
         height: number
     }
-    countdownDate: DateList
+    countdownDate: EventList
     position: {
         x: number
         y: number

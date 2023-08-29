@@ -68,6 +68,34 @@ function CustomDrawer({
         duration: transitions.duration.enteringScreen,
     }), [transitions])
 
+    const listItems = useMemo(() => list.map(i => (
+        <ListItem sx={{ justifyContent: "center" }} key={i.name}>
+            <ListItemButton
+                sx={{
+                    minHeight: 48,
+                    justifyContent: openStatus ? "initial" : "center",
+                    px: 2.5,
+                }}
+                onClick={() => nav(i.route)}
+            >
+                <ListItemIcon
+                    sx={{
+                        minWidth: 0,
+                        mr: openStatus ? 3 : "auto",
+                        justifyContent: "center",
+                    }}
+                >
+                    <Tooltip title={i.name} placement="right" disableHoverListener={openStatus}>
+                        <Avatar>
+                            {i.icon}
+                        </Avatar>
+                    </Tooltip>
+                </ListItemIcon>
+                <ListItemText primary={i.name} sx={{ display: openStatus ? "" : "none" }} />
+            </ListItemButton>
+        </ListItem>
+    )), [openStatus, nav])
+
     return (
         <Drawer
             variant="permanent"
@@ -94,35 +122,7 @@ function CustomDrawer({
                 </IconButton>
             </Toolbar>
             <List>
-                {
-                    list.map(i => (
-                        <ListItem sx={{ justifyContent: "center" }} key={i.name}>
-                            <ListItemButton
-                                sx={{
-                                    minHeight: 48,
-                                    justifyContent: openStatus ? "initial" : "center",
-                                    px: 2.5,
-                                }}
-                                onClick={() => nav(i.route)}
-                            >
-                                <ListItemIcon
-                                    sx={{
-                                        minWidth: 0,
-                                        mr: openStatus ? 3 : "auto",
-                                        justifyContent: "center",
-                                    }}
-                                >
-                                    <Tooltip title={i.name} placement="right" disableHoverListener={openStatus}>
-                                        <Avatar>
-                                            {i.icon}
-                                        </Avatar>
-                                    </Tooltip>
-                                </ListItemIcon>
-                                <ListItemText primary={i.name} sx={{ display: openStatus ? "" : "none" }} />
-                            </ListItemButton>
-                        </ListItem>
-                    ))
-                }
+                {listItems}
             </List>
         </Drawer>
     )

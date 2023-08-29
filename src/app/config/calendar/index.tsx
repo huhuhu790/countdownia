@@ -6,24 +6,32 @@ import {
     SpeedDialAction,
     Typography
 } from "@mui/material"
-import CalendarArea, { CalendarAreaRef } from "./CalendarArea"
 import { useEffect, useMemo, useRef, useState } from "react"
 import dayjs from "dayjs"
 import SpeedDialIcon from "@mui/material/SpeedDialIcon"
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined"
 import KeyboardArrowUpOutlinedIcon from "@mui/icons-material/KeyboardArrowUpOutlined"
+import Calendar, { CalendarRef } from "./Calendar"
+import { DIALOG_NAMES, DIALOG_Sizes } from "@/utils/dialogNames"
 
 export default function CalendarPage() {
-    const calendarAreaRef = useRef<CalendarAreaRef>()
+    const calendarRef = useRef<CalendarRef>()
     const anchorItem = useRef<HTMLDivElement>()
-    const [countdownDate, setCountdownDate] = useState(window.ipcRenderer.getStore<DateList>("countdownDate"))
+    const [countdownDate, setCountdownDate] = useState(window.ipcRenderer.getStore<EventList>("countdownDate"))
 
     const actions = useMemo(() => [
         {
             icon: <AddCircleOutlineOutlinedIcon />,
-            name: "Add",
+            name: "Add Event",
             event() {
-                calendarAreaRef.current.onEventAdd()
+                const type = DIALOG_NAMES.CONFIG_FORM
+                const size = DIALOG_Sizes[type]
+                window.ipcRenderer.send("openDialog",
+                    {
+                        type,
+                        ...size,
+                        info: event
+                    })
             }
         },
         {
@@ -36,10 +44,17 @@ export default function CalendarPage() {
                 })
             }
         }
-    ], [])
+    ].map((action) => (
+        <SpeedDialAction
+            key={action.name}
+            icon={action.icon}
+            tooltipTitle={action.name}
+            onClick={action.event}
+        />
+    )), [])
 
     useEffect(() => {
-        function countdownDateHasChanged(_: unknown, data: DateList) {
+        function countdownDateHasChanged(_: unknown, data: EventList) {
             setCountdownDate(data)
         }
         window.ipcRenderer.addListener("countdownDateHasChanged", countdownDateHasChanged)
@@ -48,8 +63,8 @@ export default function CalendarPage() {
         }
     }, [])
 
-    function dayGridMonth(date: Date) {
-        calendarAreaRef.current.dayGridMonth(date)
+    function jumpToDay(value: number) {
+        calendarRef.current.jumpToDay(value)
     }
 
     return (
@@ -63,28 +78,29 @@ export default function CalendarPage() {
         >
             <Box
                 sx={{
-                    flex: 3,
+                    flex: 1,
+                    maxWidth: 320,
+                    minWidth: 240,
                     height: "100%",
                     overflow: "auto"
                 }}
             >
                 <SideBar
                     countdownDate={countdownDate}
-                    dayGridMonth={dayGridMonth}
+                    jumpToDay={jumpToDay}
                 />
             </Box>
             <Box
                 sx={{
-                    flex: 7,
+                    flex: 1,
+                    minWidth: 750,
                     overflow: "auto",
                     p: 1,
                     pb: 12,
                 }}
             >
                 <Box ref={anchorItem} />
-                <CalendarArea
-                    ref={calendarAreaRef}
-                    countdownDate={countdownDate} />
+                <Calendar ref={calendarRef} countdownDate={countdownDate} />
             </Box >
             <SpeedDial
                 sx={{
@@ -97,14 +113,7 @@ export default function CalendarPage() {
                 icon={<SpeedDialIcon />}
                 direction="left"
             >
-                {actions.map((action) => (
-                    <SpeedDialAction
-                        key={action.name}
-                        icon={action.icon}
-                        tooltipTitle={action.name}
-                        onClick={action.event}
-                    />
-                ))}
+                {actions}
             </SpeedDial>
         </Box>
     )
@@ -112,10 +121,10 @@ export default function CalendarPage() {
 
 function SideBar({
     countdownDate,
-    dayGridMonth
+    jumpToDay
 }: {
-    countdownDate: DateList
-    dayGridMonth: CalendarAreaRef["dayGridMonth"]
+    countdownDate: EventList
+    jumpToDay: (value: number) => void
 }) {
     return (
         <Box sx={{ cursor: "pointer" }}>
@@ -136,7 +145,7 @@ function SideBar({
                                 <ListItemButton
                                     alignItems="flex-start"
                                     onClick={() => {
-                                        dayGridMonth(new Date(i.date))
+                                        jumpToDay(i.date)
                                         location.hash = i.id
                                     }}
                                 >

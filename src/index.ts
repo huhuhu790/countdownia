@@ -31,8 +31,8 @@ const WM_INITMENU = 0x0116
 
 const configWindowInitialWidth = 1400
 const configWindowInitialHeight = 800
-const configWindowMinWidth = 950
-const configWindowMinHeight = 600
+const configWindowMinWidth = 1080
+const configWindowMinHeight = 640
 
 const countdownWindowInitialWidth = 1000
 const countdownWindowInitialHeight = 80
