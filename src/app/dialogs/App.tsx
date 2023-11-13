@@ -1,9 +1,11 @@
 import { CssBaseline, ThemeProvider, useMediaQuery } from "@mui/material"
-import { SnackbarProvider } from "notistack"
 import { useMemo } from "react"
-import { RouterProvider, } from "react-router-dom"
+import Layout from "./layout"
+import { getNode } from "./getNode"
 import { themes } from "@/themes/themeOptions"
-import router from "./router"
+
+const params = new URLSearchParams(location.search)
+const Item = getNode(params.get("type"))
 
 export default function App() {
     const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)")
@@ -18,12 +20,9 @@ export default function App() {
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline />
-            <SnackbarProvider
-                autoHideDuration={3000}
-                SnackbarProps={{}}
-            >
-                <RouterProvider router={router} />
-            </SnackbarProvider>
+            <Layout>
+                <Item />
+            </Layout>
         </ThemeProvider>
     )
 }

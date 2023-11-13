@@ -1,18 +1,20 @@
 import {
-    Button, Dialog, DialogTitle, DialogContent,
+    Button, DialogTitle, DialogContent,
     DialogContentText, DialogActions,
     TextField,
     Box,
     Typography
 } from "@mui/material"
-import { forwardRef, useImperativeHandle, useRef, useState } from "react"
-import { EventInput } from "@fullcalendar/core"
+import { useEffect, useRef, useState } from "react"
 import { DesktopDateTimePicker } from "@mui/x-date-pickers"
 import dayjs, { Dayjs } from "dayjs"
 import { Controller, useForm } from "react-hook-form"
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs"
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider"
+import { DIALOG_NAMES } from "@/utils/dialogNames"
 
 export interface FormDialogRef {
-    openDialog: (isFormTypeAdd: boolean, currentEvent?: EventInput) => void
+    openDialog: (isFormTypeAdd: boolean, currentEvent?: EventItem) => void
 }
 interface FormType {
     title: string
@@ -21,11 +23,10 @@ interface FormType {
     endDate: Dayjs | null
     description: string
 }
-export default forwardRef<FormDialogRef>(function FormDialog(_, ref) {
-    const [open, setOpen] = useState(false)
+export default function FormDialog() {
     const [formTypeAdd, setFormTypeAdd] = useState(true)
     const id = useRef("")
-    const { control, handleSubmit, reset, setValue } = useForm<FormType, null, FormType>({
+    const { control, handleSubmit, setValue } = useForm<FormType, null, FormType>({
         defaultValues: {
             title: "",
             line: "",
@@ -35,29 +36,24 @@ export default forwardRef<FormDialogRef>(function FormDialog(_, ref) {
         }
     })
 
-    function handleClickOpen(isFormTypeAdd: boolean, currentEvent?: EventInput) {
-        setFormTypeAdd(isFormTypeAdd)
-        setOpen(true)
-        const extendedProps: Partial<DateItem> = currentEvent?.extendedProps ?? {}
-        id.current = extendedProps.id
-        setValue("title", extendedProps.title ?? "")
-        setValue("line", extendedProps.line ?? "")
-        setValue("description", extendedProps.description ?? "")
-        setValue("startDate", extendedProps.date ? dayjs(extendedProps.date) : null)
-        setValue("endDate", extendedProps.endDate ? dayjs(extendedProps.endDate) : null)
-    }
-
-    useImperativeHandle(
-        ref,
-        () => ({
-            openDialog: handleClickOpen
-        }),
-        []
-    )
+    useEffect(() => {
+        function handleClickOpen(_: unknown, { info = {} }: { info?: Partial<EventItem> }) {
+            setFormTypeAdd(!info)
+            id.current = info.id
+            setValue("title", info.title ?? "")
+            setValue("line", info.line ?? "")
+            setValue("description", info.description ?? "")
+            setValue("startDate", info.date ? dayjs(info.date) : null)
+            setValue("endDate", info.endDate ? dayjs(info.endDate) : null)
+        }
+        window.ipcRenderer.addListener("open-dialog-extraInfo", handleClickOpen)
+        return () => {
+            window.ipcRenderer.removeListener("open-dialog-extraInfo", handleClickOpen)
+        }
+    }, [])
 
     function handleClose() {
-        setOpen(false)
-        reset()
+        window.ipcRenderer.send("hideDialog", DIALOG_NAMES.CONFIG_FORM)
     }
 
     const onSubmit = handleSubmit(
@@ -75,10 +71,10 @@ export default forwardRef<FormDialogRef>(function FormDialog(_, ref) {
     )
 
     return (
-        <Dialog open={open} onClose={handleClose}>
-            <DialogTitle>{formTypeAdd ? "Add" : "Edit"}</DialogTitle>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DialogTitle>{formTypeAdd ? "Add Event" : "Edit Event"}</DialogTitle>
             <DialogContent>
-                <DialogContentText>
+                <DialogContentText sx={{ mb: 1 }}>
                     To {formTypeAdd ? "add" : "edit"} an event, please enter the following infomation.
                 </DialogContentText>
                 <Controller
@@ -159,7 +155,7 @@ export default forwardRef<FormDialogRef>(function FormDialog(_, ref) {
                             label="description"
                             type="text"
                             multiline
-                            rows={4}
+                            rows={12}
                             fullWidth
                             error={!!fieldState.error}
                             helperText={fieldState.error?.message}
@@ -171,6 +167,6 @@ export default forwardRef<FormDialogRef>(function FormDialog(_, ref) {
                 <Button color="warning" onClick={handleClose}>Cancel</Button>
                 <Button color="primary" onClick={onSubmit}>Submit</Button>
             </DialogActions>
-        </Dialog>
+        </LocalizationProvider>
     )
-})
+}

@@ -6,19 +6,22 @@ import { WebpackPlugin } from "@electron-forge/plugin-webpack"
 
 import { mainConfig } from "./webpack.main.config"
 import { rendererConfig } from "./webpack.renderer.config"
+import path from "node:path"
+
+const icon = path.resolve(__dirname, "public", "favicon.ico")
 
 const config: ForgeConfig = {
   packagerConfig: {
-    icon: "public/favicon",
+    icon: "./public/favicon",
     asar: true
   },
   rebuildConfig: {},
   makers: [
     new MakerSquirrel({
-      setupIcon: "public/favicon",
-      iconUrl: "public/favicon"
+      setupIcon: icon,
+      iconUrl: icon
     }),
-    new MakerZIP({}, ["darwin"]),
+    new MakerZIP(),
   ],
   plugins: [
     new AutoUnpackNativesPlugin({}),
@@ -45,8 +48,16 @@ const config: ForgeConfig = {
           },
           {
             html: "./src/index.html",
-            js: "./src/app/startup/main.tsx",
-            name: "startup"
+            js: "./src/app/loading/main.tsx",
+            name: "loading"
+          },
+          {
+            html: "./src/index.html",
+            js: "./src/app/dialogs/main.tsx",
+            name: "dialogs",
+            preload: {
+              js: "./src/preload.ts",
+            },
           },
         ],
       },

@@ -1,0 +1,17 @@
+@import url(/src/styles/drag.css);
+
+body {
+    overflow: hidden;
+    background-color: transparent !important;
+    height: 100vh;
+}
+
+#app {
+    height: 100%;
+    overflow: auto;
+}
+
+*::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}

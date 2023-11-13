@@ -1,25 +1,60 @@
 import {
-    AppBar, Box,
-    Toolbar, Paper, List, ListItem, Divider, ListItemText, Typography, Button
+    Box,
+    List, ListItem,
+    ListItemButton, ListItemText,
+    SpeedDial,
+    SpeedDialAction,
+    Typography
 } from "@mui/material"
-import CalendarArea, { CalendarAreaRef } from "./CalendarArea"
-import { Fragment, useEffect, useRef, useState } from "react"
-import type { IpcRendererEvent } from "electron"
-import FormDialog, { FormDialogRef } from "./FormDialog"
+import { useEffect, useMemo, useRef, useState } from "react"
 import dayjs from "dayjs"
-import ScrollTop from "../../components/ScrollTop"
-
-const sideWidth = 280
-const appBarHeight = 64
+import SpeedDialIcon from "@mui/material/SpeedDialIcon"
+import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined"
+import KeyboardArrowUpOutlinedIcon from "@mui/icons-material/KeyboardArrowUpOutlined"
+import Calendar, { CalendarRef } from "./Calendar"
+import { DIALOG_NAMES, DIALOG_Sizes } from "@/utils/dialogNames"
 
 export default function CalendarPage() {
-    const calendarAreaRef = useRef<CalendarAreaRef>()
-    const parentRef = useRef<HTMLDivElement>()
-    const [countdownDate, setCountdownDate] = useState(window.ipcRenderer.getStore<DateList>("countdownDate"))
-    const formDialogRef = useRef<FormDialogRef>()
+    const calendarRef = useRef<CalendarRef>()
+    const anchorItem = useRef<HTMLDivElement>()
+    const [countdownDate, setCountdownDate] = useState(window.ipcRenderer.getStore<EventList>("countdownDate"))
+
+    const actions = useMemo(() => [
+        {
+            icon: <AddCircleOutlineOutlinedIcon />,
+            name: "Add Event",
+            event() {
+                const type = DIALOG_NAMES.CONFIG_FORM
+                const size = DIALOG_Sizes[type]
+                window.ipcRenderer.send("openDialog",
+                    {
+                        type,
+                        ...size,
+                        info: event
+                    })
+            }
+        },
+        {
+            icon: <KeyboardArrowUpOutlinedIcon />,
+            name: "Back to top",
+            event() {
+                anchorItem.current.scrollIntoView({
+                    block: "center",
+                    behavior: "smooth"
+                })
+            }
+        }
+    ].map((action) => (
+        <SpeedDialAction
+            key={action.name}
+            icon={action.icon}
+            tooltipTitle={action.name}
+            onClick={action.event}
+        />
+    )), [])
 
     useEffect(() => {
-        function countdownDateHasChanged(e: IpcRendererEvent, data: DateList) {
+        function countdownDateHasChanged(_: unknown, data: EventList) {
             setCountdownDate(data)
         }
         window.ipcRenderer.addListener("countdownDateHasChanged", countdownDateHasChanged)
@@ -28,124 +63,115 @@ export default function CalendarPage() {
         }
     }, [])
 
-    function dayGridMonth(date: Date) {
-        calendarAreaRef.current.dayGridMonth(date)
+    function jumpToDay(value: number) {
+        calendarRef.current.jumpToDay(value)
     }
 
     return (
         <Box
             sx={{
                 display: "flex",
-                height: "100%"
+                height: "100%",
+                width: "100%",
+                position: "relative",
             }}
         >
-            <FormDialog ref={formDialogRef} />
-            <Paper
-                elevation={2}
+            <Box
                 sx={{
-                    width: sideWidth + "px",
+                    flex: 1,
+                    maxWidth: 320,
+                    minWidth: 240,
                     height: "100%",
                     overflow: "auto"
                 }}
             >
                 <SideBar
                     countdownDate={countdownDate}
-                    dayGridMonth={dayGridMonth}
+                    jumpToDay={jumpToDay}
                 />
-            </Paper>
-            <Paper
-                elevation={2}
+            </Box>
+            <Box
                 sx={{
                     flex: 1,
-                    position: "relative"
+                    minWidth: 750,
+                    overflow: "auto",
+                    p: 1,
+                    pb: 12,
                 }}
             >
-                <AppBar
-                    position="sticky"
-                    sx={{
-                        height: appBarHeight
-                    }}
-                >
-                    <Toolbar ></Toolbar>
-                </AppBar>
-                <Box
-                    ref={parentRef}
-                    sx={{
-                        width: "100%",
-                        height: `calc(100% - ${appBarHeight}px)`,
-                        overflow: "auto"
-                    }}
-                >
-                    <div id="scroll-into"></div>
-                    <CalendarArea
-                        ref={calendarAreaRef}
-                        formDialogRef={formDialogRef}
-                        countdownDate={countdownDate} />
-                </Box>
-                <ScrollTop bottom={12} right={24} el={parentRef} position="absolute" />
-            </Paper >
+                <Box ref={anchorItem} />
+                <Calendar ref={calendarRef} countdownDate={countdownDate} />
+            </Box >
+            <SpeedDial
+                sx={{
+                    position: "absolute",
+                    bottom: 24,
+                    right: 24,
+                }}
+                ariaLabel="SpeedDial"
+                hidden={false}
+                icon={<SpeedDialIcon />}
+                direction="left"
+            >
+                {actions}
+            </SpeedDial>
         </Box>
     )
 }
 
 function SideBar({
     countdownDate,
-    dayGridMonth
+    jumpToDay
 }: {
-    countdownDate: DateList
-    dayGridMonth: CalendarAreaRef["dayGridMonth"]
+    countdownDate: EventList
+    jumpToDay: (value: number) => void
 }) {
     return (
-        <>
-            <Toolbar>
-            </Toolbar>
-            <Box sx={{ cursor: "pointer" }}>
-                <List sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper", padding: 0 }}>
-                    {
-                        countdownDate.map(i => {
-                            const dateStart = dayjs(i.date)
-                            const startHour = dateStart.hour()
-                            const start = dateStart.format("YYYY-MM-DD") + (startHour > 0 ? `/${startHour}H` : "")
-                            let end = ""
-                            if (i.endDate) {
-                                const dateEnd = dayjs(i.endDate)
-                                const endHour = dateEnd.hour()
-                                end = dateEnd.format("YYYY-MM-DD") + (endHour > 0 ? `/${dateEnd}H` : "")
-                            }
-                            return (
-                                <Fragment key={i.id}>
-                                    <ListItem
-                                        alignItems="flex-start"
-                                        onClick={() => {
-                                            dayGridMonth(new Date(i.date))
-                                            location.hash = i.id
-                                        }}
-                                    >
-                                        <ListItemText
-                                            primary={i.title}
-                                            primaryTypographyProps={{ noWrap: true }}
-                                            secondaryTypographyProps={{ component: "div" }}
-                                            secondary={
-                                                <>
-                                                    <Typography
-                                                        variant="body2"
-                                                        color="text.primary"
-                                                        noWrap
-                                                    >
-                                                        {i.description ?? "..."}
-                                                    </Typography>
-                                                    {end ? `${start} To ${end}` : start}
-                                                </>
-                                            }
-                                        />
-                                    </ListItem>
-                                    <Divider />
-                                </Fragment>
-                            )
-                        })
-                    }
-                </List>
-            </Box>
-        </>
+        <Box sx={{ cursor: "pointer" }}>
+            <List sx={{ width: "100%", maxWidth: 360, padding: 0 }}>
+                {
+                    countdownDate.map(i => {
+                        const dateStart = dayjs(i.date)
+                        const startHour = dateStart.hour()
+                        const start = dateStart.format("YYYY-MM-DD") + (startHour > 0 ? `/${startHour}H` : "")
+                        let end = ""
+                        if (i.endDate) {
+                            const dateEnd = dayjs(i.endDate)
+                            const endHour = dateEnd.hour()
+                            end = dateEnd.format("YYYY-MM-DD") + (endHour > 0 ? `/${dateEnd}H` : "")
+                        }
+                        return (
+                            <ListItem key={i.id} >
+                                <ListItemButton
+                                    alignItems="flex-start"
+                                    onClick={() => {
+                                        jumpToDay(i.date)
+                                        location.hash = i.id
+                                    }}
+                                >
+                                    <ListItemText
+                                        primary={i.title}
+                                        primaryTypographyProps={{ noWrap: true }}
+                                        secondaryTypographyProps={{ component: "div" }}
+                                        secondary={
+                                            <>
+                                                <Typography
+                                                    variant="body2"
+                                                    color="text.primary"
+                                                    noWrap
+                                                >
+                                                    {i.description ?? "..."}
+                                                </Typography>
+                                                {end ? `${start} To ${end}` : start}
+                                            </>
+                                        }
+                                    />
+                                </ListItemButton>
+                            </ListItem>
+                        )
+                    })
+                }
+            </List>
+        </Box>
     )
 }

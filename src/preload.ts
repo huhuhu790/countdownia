@@ -6,12 +6,14 @@ contextBridge.exposeInMainWorld(
         getStore<T>(name: string): T {
             return ipcRenderer.sendSync("getStore", name)
         },
+        // on
         send(channel: string, ...args: unknown[]) {
             ipcRenderer.send(channel, ...args)
         },
         sendSync<T>(channel: string, ...args: unknown[]): T {
             return ipcRenderer.sendSync(channel, ...args)
         },
+        // handle
         async invoke<T>(channel: string, ...args: unknown[]): Promise<T> {
             return await ipcRenderer.invoke(channel, ...args)
         },
