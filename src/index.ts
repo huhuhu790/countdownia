@@ -30,9 +30,9 @@ declare const LOADING_WEBPACK_ENTRY: string
 const WM_INITMENU = 0x0116
 
 const configWindowInitialWidth = 1400
-const configWindowInitialHeight = 800
-const configWindowMinWidth = 1080
-const configWindowMinHeight = 640
+const configWindowInitialHeight = 825
+const configWindowMinWidth = 1400
+const configWindowMinHeight = 825
 
 const countdownWindowInitialWidth = 1000
 const countdownWindowInitialHeight = 80

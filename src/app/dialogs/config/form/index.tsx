@@ -71,104 +71,102 @@ export default function FormDialog() {
     )
 
     return (
-        <>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DialogTitle>{formTypeAdd ? "Add Event" : "Edit Event"}</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        To {formTypeAdd ? "add" : "edit"} an event, please enter the following infomation.
-                    </DialogContentText>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DialogTitle>{formTypeAdd ? "Add Event" : "Edit Event"}</DialogTitle>
+            <DialogContent>
+                <DialogContentText sx={{ mb: 1 }}>
+                    To {formTypeAdd ? "add" : "edit"} an event, please enter the following infomation.
+                </DialogContentText>
+                <Controller
+                    name="title"
+                    control={control}
+                    rules={{ required: { value: true, message: "Title is required" } }}
+                    render={({ field, fieldState }) =>
+                        <TextField
+                            sx={{ height: "80px" }}
+                            label="title"
+                            type="text"
+                            fullWidth
+                            error={!!fieldState.error}
+                            helperText={fieldState.error?.message}
+                            {...field}
+                        />}
+                />
+                <Controller
+                    name="line"
+                    control={control}
+                    rules={{ required: false }}
+                    render={({ field, fieldState }) =>
+                        <TextField
+                            sx={{ height: "80px" }}
+                            label="line"
+                            type="text"
+                            fullWidth
+                            error={!!fieldState.error}
+                            helperText={fieldState.error?.message}
+                            {...field}
+                        />
+                    }
+                />
+                <Box display="flex" alignItems="center" justifyContent="center">
                     <Controller
-                        name="title"
+                        name="startDate"
                         control={control}
-                        rules={{ required: { value: true, message: "Title is required" } }}
+                        rules={{ required: { value: true, message: "Date is required" } }}
                         render={({ field, fieldState }) =>
-                            <TextField
-                                sx={{ height: "80px" }}
-                                label="title"
-                                type="text"
-                                fullWidth
-                                error={!!fieldState.error}
-                                helperText={fieldState.error?.message}
-                                {...field}
-                            />}
-                    />
-                    <Controller
-                        name="line"
-                        control={control}
-                        rules={{ required: false }}
-                        render={({ field, fieldState }) =>
-                            <TextField
-                                sx={{ height: "80px" }}
-                                label="line"
-                                type="text"
-                                fullWidth
-                                error={!!fieldState.error}
-                                helperText={fieldState.error?.message}
+                            <DesktopDateTimePicker
+                                sx={{ height: "80px", flex: 1 }}
+                                slotProps={{
+                                    textField: {
+                                        error: !!fieldState.error,
+                                        helperText: fieldState.error?.message
+                                    }
+                                }}
                                 {...field}
                             />
                         }
                     />
-                    <Box display="flex" alignItems="center" justifyContent="center">
-                        <Controller
-                            name="startDate"
-                            control={control}
-                            rules={{ required: { value: true, message: "Date is required" } }}
-                            render={({ field, fieldState }) =>
-                                <DesktopDateTimePicker
-                                    sx={{ height: "80px", flex: 1 }}
-                                    slotProps={{
-                                        textField: {
-                                            error: !!fieldState.error,
-                                            helperText: fieldState.error?.message
-                                        }
-                                    }}
-                                    {...field}
-                                />
-                            }
-                        />
-                        <Typography margin={3} mt={0} height="100%"> – </Typography>
-                        <Controller
-                            name="endDate"
-                            control={control}
-                            rules={{ required: false }}
-                            render={({ field, fieldState }) =>
-                                <DesktopDateTimePicker
-                                    sx={{ height: "80px", flex: 1 }}
-                                    slotProps={{
-                                        textField: {
-                                            fullWidth: true,
-                                            error: !!fieldState.error,
-                                            helperText: fieldState.error?.message
-                                        }
-                                    }}
-                                    {...field}
-                                />
-                            }
-                        />
-                    </Box>
+                    <Typography margin={3} mt={0} height="100%"> – </Typography>
                     <Controller
-                        name="description"
+                        name="endDate"
                         control={control}
                         rules={{ required: false }}
                         render={({ field, fieldState }) =>
-                            <TextField
-                                label="description"
-                                type="text"
-                                multiline
-                                rows={12}
-                                fullWidth
-                                error={!!fieldState.error}
-                                helperText={fieldState.error?.message}
+                            <DesktopDateTimePicker
+                                sx={{ height: "80px", flex: 1 }}
+                                slotProps={{
+                                    textField: {
+                                        fullWidth: true,
+                                        error: !!fieldState.error,
+                                        helperText: fieldState.error?.message
+                                    }
+                                }}
                                 {...field}
-                            />}
+                            />
+                        }
                     />
-                </DialogContent>
-                <DialogActions>
-                    <Button color="warning" onClick={handleClose}>Cancel</Button>
-                    <Button color="primary" onClick={onSubmit}>Submit</Button>
-                </DialogActions>
-            </LocalizationProvider>
-        </>
+                </Box>
+                <Controller
+                    name="description"
+                    control={control}
+                    rules={{ required: false }}
+                    render={({ field, fieldState }) =>
+                        <TextField
+                            label="description"
+                            type="text"
+                            multiline
+                            rows={12}
+                            fullWidth
+                            error={!!fieldState.error}
+                            helperText={fieldState.error?.message}
+                            {...field}
+                        />}
+                />
+            </DialogContent>
+            <DialogActions>
+                <Button color="warning" onClick={handleClose}>Cancel</Button>
+                <Button color="primary" onClick={onSubmit}>Submit</Button>
+            </DialogActions>
+        </LocalizationProvider>
     )
 }

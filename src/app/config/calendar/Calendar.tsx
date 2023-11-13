@@ -387,9 +387,21 @@ function DayCeil({
                     }}
                 >
                     <CardActionArea onClick={() => onEventClick(i)} >
-                        <CardContent sx={{ display: "flex", p: 1 }}>
-                            <Typography >{i.title}</Typography >
-                            <Typography >{i.description}</Typography >
+                        <CardContent sx={{ p: 1 }}>
+                            <Typography
+                                variant="subtitle1"
+                                component="div"
+                                align="left"
+                            >
+                                {i.title}
+                            </Typography >
+                            <Typography
+                                component="div"
+                                align="left"
+                                variant="body2"
+                            >
+                                {i.description}
+                            </Typography >
                         </CardContent>
                     </CardActionArea>
                 </Card > :
@@ -404,9 +416,21 @@ function DayCeil({
                 key={i.id}
             >
                 <CardActionArea onClick={() => onEventClick(i)} >
-                    <CardContent sx={{ display: "flex", p: 1 }}>
-                        <Typography >{i.title}</Typography >
-                        <Typography >{i.description}</Typography >
+                    <CardContent sx={{ p: 1 }}>
+                        <Typography
+                            variant="subtitle1"
+                            component="div"
+                            align="left"
+                        >
+                            {i.title}
+                        </Typography >
+                        <Typography
+                            component="div"
+                            align="left"
+                            variant="body2"
+                        >
+                            {i.description}
+                        </Typography >
                     </CardContent>
                 </CardActionArea>
             </Card>
